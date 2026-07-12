@@ -6,8 +6,8 @@ Study material and practice tools for AWS certifications.
 
 ### AWS Certified Developer – Associate (DVA-C02)
 
-**[`dva-c02-quiz/index.html`](dva-c02-quiz/index.html)** — an interactive, self-contained
-practice exam. Open the file in any browser; there are no dependencies and no network calls.
+**[`index.html`](index.html)** — an interactive, self-contained practice exam.
+Open the file in any browser; there are no dependencies and no network calls.
 
 - **62 questions** across all four exam domains, weighted to match the official blueprint:
   - Development with AWS Services (32%)
