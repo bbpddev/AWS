@@ -25,8 +25,11 @@ Open the file in any browser; there are no dependencies and no network calls.
   - Security (26%)
   - Deployment (24%)
   - Troubleshooting & Optimization (18%)
-- **Practice mode** (instant feedback + explanation per question) and **Exam mode**
-  (answer straight through, scored at the end).
+- **Practice mode** (instant feedback + explanation per question), **Exam mode**
+  (answer straight through, scored at the end), and **Cram mode** — a flip-card drill:
+  answer in your head, flip to reveal, then mark **Got it** (card retired) or **Again**
+  (card returns to the back of the deck until mastered). Keyboard-driven: Space to flip,
+  1/2 or arrow keys to grade.
 - Running timer, shuffled questions/answers, a per-domain mastery breakdown against the
   ~72% (720/1000) pass line, and a review of every missed question.
 - Light/dark theme aware.

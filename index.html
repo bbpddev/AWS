@@ -231,6 +231,15 @@
 
   .qnav { display: flex; gap: 12px; margin-top: 22px; }
 
+  /* ---- cram mode ---- */
+  .cram-stats { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 14px; }
+  .cram-flip-hint { font-family: var(--mono); font-size: 12px; color: var(--faint); text-align: center; margin: 14px 0 0; }
+  .cram-actions { display: flex; gap: 12px; margin-top: 22px; }
+  .cram-actions .btn { flex: 1; }
+  .btn-again { background: var(--bad-wash); color: var(--bad-ink); border-color: color-mix(in srgb, var(--bad) 45%, transparent); }
+  .btn-again:hover { border-color: var(--bad); }
+  .kbd { font-family: var(--mono); font-size: 10.5px; border: 1px solid var(--border-strong); border-bottom-width: 2px; border-radius: 5px; padding: 1px 5px; margin-left: 7px; opacity: .75; }
+
   /* ---- results ---- */
   .score-hero { text-align: center; padding: 8px 0 4px; }
   .ring-wrap { position: relative; width: 168px; height: 168px; margin: 6px auto 4px; }
@@ -760,7 +769,12 @@
     revealed: [],    // per question: bool (practice)
     screen: "start",
     startedAt: 0,
-    timerId: null
+    timerId: null,
+    // cram mode
+    deck: [],
+    cramTotal: 0,
+    cramAgain: 0,
+    flipped: false
   };
   var KEYS = ["A","B","C","D","E","F"];
 
@@ -814,7 +828,7 @@
     modeField.appendChild(el("div", "field-label", "Mode"));
     var seg = el("div", "seg");
     seg.setAttribute("role", "group");
-    [["practice", "Practice", "instant feedback"], ["exam", "Exam", "score at the end"]].forEach(function (m) {
+    [["practice", "Practice", "instant feedback"], ["exam", "Exam", "score at the end"], ["cram", "Cram", "flip-card drill"]].forEach(function (m) {
       var b = el("button", null, m[1] + '<span class="sub">' + m[2] + "</span>");
       b.type = "button";
       b.setAttribute("aria-pressed", state.mode === m[0]);
@@ -873,7 +887,7 @@
     lenField.appendChild(lenRow);
     setup.appendChild(lenField);
 
-    var startBtn = el("button", "btn btn-primary btn-block", "Start exam &nbsp;→");
+    var startBtn = el("button", "btn btn-primary btn-block", "Start session &nbsp;→");
     startBtn.type = "button";
     startBtn.id = "startBtn";
     startBtn.onclick = startQuiz;
@@ -891,17 +905,22 @@
   }
 
   // ---------- build & start ----------
-  function startQuiz() {
+  function buildPool() {
     var picked = BANK.filter(function (q) { return state.selectedDomains[q.d]; });
     picked = shuffle(picked);
     var n = Math.min(state.length, picked.length);
-    state.pool = picked.slice(0, n).map(function (q) {
+    return picked.slice(0, n).map(function (q) {
       // shuffle options while tracking correct indices
       var order = shuffle(q.o.map(function (_, i) { return i; }));
       var newOpts = order.map(function (i) { return q.o[i]; });
       var newAns = q.a.map(function (ai) { return order.indexOf(ai); });
       return { d: q.d, q: q.q, o: newOpts, a: newAns, multi: !!q.multi, e: q.e, svc: q.svc };
     });
+  }
+
+  function startQuiz() {
+    if (state.mode === "cram") { startCram(); return; }
+    state.pool = buildPool();
     state.index = 0;
     state.responses = state.pool.map(function () { return []; });
     state.revealed = state.pool.map(function () { return false; });
@@ -911,6 +930,156 @@
     renderQuestion();
     window.scrollTo(0, 0);
   }
+
+  // ---------- cram (flip-card) mode ----------
+  function startCram() {
+    state.deck = buildPool();
+    state.cramTotal = state.deck.length;
+    state.cramAgain = 0;   // total re-queues this session
+    state.flipped = false;
+    state.startedAt = Date.now();
+    state.screen = "cram";
+    startTimer();
+    renderCram();
+    window.scrollTo(0, 0);
+  }
+
+  function cramAgainCard() {
+    var c = state.deck.shift();
+    state.deck.push(c);
+    state.cramAgain++;
+    state.flipped = false;
+    renderCram();
+    window.scrollTo(0, 0);
+  }
+
+  function cramGotIt() {
+    state.deck.shift();
+    state.flipped = false;
+    if (state.deck.length === 0) { stopTimer(); state.screen = "cramdone"; renderCramDone(); }
+    else renderCram();
+    window.scrollTo(0, 0);
+  }
+
+  function renderCram() {
+    app.innerHTML = "";
+    var q = state.deck[0];
+    var dom = DOMAINS[q.d];
+    var known = state.cramTotal - state.deck.length;
+
+    var card = el("section", "card fade");
+
+    // header
+    var head = el("div", "qhead");
+    var count = el("div", "qcount");
+    count.innerHTML = "Mastered <b>" + known + "</b> / " + state.cramTotal +
+      (state.cramAgain ? ' &nbsp;·&nbsp; ' + state.cramAgain + " re-queued" : "");
+    head.appendChild(count);
+    var right = el("div", "qright");
+    right.appendChild(el("span", "dchip", dom.code + " · " + esc(dom.name.split(" ")[0])));
+    var timer = el("span", "timer", "00:00");
+    timer.id = "timer";
+    right.appendChild(timer);
+    head.appendChild(right);
+    card.appendChild(head);
+
+    // progress
+    var track = el("div", "track");
+    var fill = el("div", "fill");
+    fill.style.width = ((known / state.cramTotal) * 100) + "%";
+    track.appendChild(fill);
+    card.appendChild(track);
+
+    // question
+    card.appendChild(el("h2", "qtext", esc(q.q)));
+    card.appendChild(el("p", "qhint", (q.multi ? "▸ TWO correct answers" : "▸ One correct answer") + " — answer in your head, then flip"));
+
+    // options: plain on front, correct highlighted on back
+    var opts = el("div", "opts");
+    q.o.forEach(function (text, i) {
+      var b = el("button", "opt");
+      b.type = "button";
+      b.disabled = true;
+      var mark = "";
+      if (state.flipped && q.a.indexOf(i) !== -1) {
+        b.classList.add("correct");
+        mark = '<span class="mark">✓ correct</span>';
+      }
+      b.innerHTML =
+        '<span class="key">' + KEYS[i] + "</span>" +
+        '<span class="txt">' + esc(text) + "</span>" + mark;
+      opts.appendChild(b);
+    });
+    card.appendChild(opts);
+
+    if (!state.flipped) {
+      var flipBtn = el("button", "btn btn-primary btn-block", 'Flip card<span class="kbd">space</span>');
+      flipBtn.type = "button";
+      flipBtn.onclick = function () { state.flipped = true; renderCram(); };
+      var nav = el("div", "qnav");
+      nav.appendChild(flipBtn);
+      card.appendChild(nav);
+    } else {
+      var ex = el("div", "explain ok");
+      ex.innerHTML =
+        '<div class="verdict">✓ Answer</div>' +
+        "<p>" + esc(q.e) + "</p>" +
+        '<div class="svc">▪ ' + esc(q.svc) + "</div>";
+      card.appendChild(ex);
+
+      var actions = el("div", "cram-actions");
+      var againBtn = el("button", "btn btn-ghost btn-again", '↻ Again<span class="kbd">1</span>');
+      againBtn.type = "button";
+      againBtn.onclick = cramAgainCard;
+      var gotBtn = el("button", "btn btn-primary", 'Got it ✓<span class="kbd">2</span>');
+      gotBtn.type = "button";
+      gotBtn.onclick = cramGotIt;
+      actions.appendChild(againBtn);
+      actions.appendChild(gotBtn);
+      card.appendChild(actions);
+      card.appendChild(el("p", "cram-flip-hint", "Not sure you'd get it on exam day? Hit Again — it returns to the back of the deck until you own it."));
+    }
+
+    app.appendChild(card);
+  }
+
+  function renderCramDone() {
+    app.innerHTML = "";
+    var elapsed = fmt(Date.now() - state.startedAt);
+    var card = el("section", "card fade");
+    card.appendChild(el("div", "eyebrow", "Cram session complete"));
+    card.appendChild(el("h1", null, "Deck mastered ✓"));
+    card.appendChild(el("p", "lead",
+      "You worked through all <b>" + state.cramTotal + "</b> cards" +
+      (state.cramAgain
+        ? ", with <b>" + state.cramAgain + "</b> re-queue" + (state.cramAgain > 1 ? "s" : "") + " along the way. Cards you re-queued are your weak spots — run a fresh Practice or Exam session on those domains next."
+        : " without a single re-queue. Strong — now confirm it under exam conditions with a 65-question Exam session.")));
+
+    var facts = el("div", "facts");
+    ["<b>" + state.cramTotal + "</b> cards", "<b>" + state.cramAgain + "</b> re-queued", "time <b>" + elapsed + "</b>"].forEach(function (f) {
+      facts.appendChild(el("span", "fact", f));
+    });
+    card.appendChild(facts);
+
+    var again = el("button", "btn btn-primary btn-block", "New session");
+    again.type = "button";
+    again.style.marginTop = "18px";
+    again.onclick = renderStart;
+    card.appendChild(again);
+    app.appendChild(card);
+  }
+
+  // cram keyboard shortcuts
+  document.addEventListener("keydown", function (ev) {
+    if (state.screen !== "cram") return;
+    if (ev.key === " " || ev.key === "Enter") {
+      if (!state.flipped) { ev.preventDefault(); state.flipped = true; renderCram(); }
+      return;
+    }
+    if (!state.flipped) return;
+    if (ev.key === "1" || ev.key === "ArrowLeft") { ev.preventDefault(); cramAgainCard(); }
+    else if (ev.key === "2" || ev.key === "ArrowRight") { ev.preventDefault(); cramGotIt(); }
+  });
 
   // ---------- timer ----------
   function fmt(ms) {
