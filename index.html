@@ -303,449 +303,449 @@
   // ---------- question bank ----------
   // answer = array of correct option indices. multi:true when more than one.
   var BANK = [
-    // ===== Domain 1: Development =====
-    { d:"d1", q:"A Lambda function writes to a small RDS database that can only handle a limited number of connections. During traffic spikes the database is overwhelmed by too many concurrent function instances. How do you cap the function at no more than 10 simultaneous executions?",
-      o:["Set the function's reserved concurrency to 10","Set provisioned concurrency to 10","Lower the account-level concurrency limit to 10","Reduce the SQS batch size to 10"],
-      a:[0], e:"Reserved concurrency guarantees a maximum (and minimum) number of concurrent executions for a function, protecting downstream resources. Provisioned concurrency pre-warms instances to cut cold starts but does not cap the ceiling.", svc:"Lambda concurrency" },
-
-    { d:"d1", q:"An application needs microsecond read latency for a DynamoDB table with a read-heavy, eventually-consistent workload — with no changes to application query code. What should you add?",
-      o:["Amazon DynamoDB Accelerator (DAX)","Amazon ElastiCache for Redis","A DynamoDB global secondary index","DynamoDB global tables"],
-      a:[0], e:"DAX is a fully managed, in-memory cache built specifically for DynamoDB, delivering microsecond latency and using the same API/SDK calls, so no query-code changes are needed. ElastiCache would require you to manage caching logic in the app.", svc:"DynamoDB DAX" },
-
-    { d:"d1", q:"You must guarantee that messages are processed exactly once and in the exact order they were sent. Which service configuration fits?",
-      o:["An SQS FIFO queue","An SQS standard queue","An SNS standard topic","A Kinesis Data Stream with one shard"],
-      a:[0], e:"SQS FIFO queues provide first-in-first-out ordering and exactly-once processing. Standard queues offer best-effort ordering and at-least-once delivery (possible duplicates).", svc:"SQS FIFO" },
-
-    { d:"d1", q:"A single SNS topic must deliver every published message to three independent SQS queues, each owned by a different microservice. What is this pattern called and how is it built?",
-      o:["Fan-out: subscribe each SQS queue to the SNS topic","Fan-in: publish from each queue to one topic","Use SQS message groups to duplicate messages","Enable SNS message filtering to clone messages"],
-      a:[0], e:"The fan-out pattern subscribes multiple SQS queues to a single SNS topic; every published message is pushed to all subscribed queues in parallel, decoupling producers from consumers.", svc:"SNS + SQS fan-out" },
-
-    { d:"d1", q:"With API Gateway using a NON-proxy (custom) Lambda integration, how can you reshape an incoming JSON request before it reaches the backend without writing extra Lambda code?",
-      o:["Use a mapping template in the integration request","Switch to Lambda proxy integration","Add a Gateway response override","Use a usage plan"],
-      a:[0], e:"Mapping templates (Velocity/VTL) transform the request/response between client and backend in non-proxy integrations. With proxy integration the raw request is passed straight through, so all transformation must happen in code.", svc:"API Gateway mapping templates" },
-
-    { d:"d1", q:"You need to retrieve all items that share the same partition key value, sorted by the sort key, as efficiently as possible. Which DynamoDB operation should you use?",
-      o:["Query","Scan","GetItem","BatchGetItem"],
-      a:[0], e:"Query reads items with a specific partition key and can use sort-key conditions, reading only matching items. Scan reads the entire table and filters afterward — far less efficient and more costly.", svc:"DynamoDB Query vs Scan" },
-
-    { d:"d1", q:"A workflow must coordinate several Lambda functions with branching, retries, and a human-approval step that may wait for days. Which service and workflow type is appropriate?",
-      o:["Step Functions Standard workflow","Step Functions Express workflow","SQS with a visibility timeout","EventBridge scheduled rules"],
-      a:[0], e:"Standard workflows can run up to one year and support wait-for-callback (task tokens) for long-running human-approval steps. Express workflows are optimized for high-volume, short-duration (≤5 min) event processing.", svc:"Step Functions" },
-
-    { d:"d1", q:"A Lambda function processes files and needs up to 4 GB of temporary scratch space on local disk. What must you configure?",
-      o:["Increase ephemeral storage (/tmp) up to 10,240 MB","Attach an EBS volume to the function","Mount an instance store volume","Increase the function's reserved concurrency"],
-      a:[0], e:"Lambda's /tmp ephemeral storage defaults to 512 MB and can be configured up to 10,240 MB (10 GB). Lambda cannot attach EBS or instance-store volumes; for shared persistent storage you would use EFS.", svc:"Lambda ephemeral storage" },
-
-    { d:"d1", q:"Which caching engine should you choose when you need pub/sub messaging, sorted sets, and data persistence/replication?",
-      o:["Amazon ElastiCache for Redis","Amazon ElastiCache for Memcached","DynamoDB DAX","Amazon MQ"],
-      a:[0], e:"Redis supports advanced data structures (sorted sets, lists), pub/sub, replication, snapshots, and persistence. Memcached is a simpler, multi-threaded key/value cache with no persistence or pub/sub.", svc:"ElastiCache Redis vs Memcached" },
-
-    { d:"d1", q:"To reduce repeated calls to a slow backend, you want API Gateway to return cached responses for identical requests for 300 seconds. What do you enable?",
-      o:["API caching on the stage with a TTL","A usage plan with throttling","A Lambda authorizer","Request validation"],
-      a:[0], e:"API Gateway stage-level caching stores endpoint responses for a configurable TTL (0–3600s), reducing calls to the backend integration. Caching is enabled per stage and can be keyed on specific parameters.", svc:"API Gateway caching" },
-
-    { d:"d1", q:"Which TWO actions let you increase the write throughput of a Kinesis Data Stream and preserve ordering of related records? (Choose TWO)",
-      o:["Increase the number of shards","Use a well-distributed partition key so related records map to the same shard","Enable server-side encryption","Switch the stream to provisioned Lambda concurrency","Reduce the data retention period"],
-      a:[0,1], multi:true, e:"Throughput scales with the number of shards (each shard = 1 MB/s or 1,000 records/s in). Ordering is guaranteed per shard, and the partition key determines the target shard, so a good key keeps related records ordered on the same shard.", svc:"Kinesis Data Streams" },
-
-    { d:"d1", q:"You want to trigger a Lambda function automatically whenever an item is created, updated, or deleted in a DynamoDB table. What do you use?",
-      o:["Enable DynamoDB Streams and set the function as the trigger","Poll the table on a schedule with EventBridge","Enable DynamoDB TTL","Use a DynamoDB global secondary index"],
-      a:[0], e:"DynamoDB Streams capture an ordered, time-ordered sequence of item-level modifications and can invoke a Lambda function (event source mapping) for each change — the standard change-data-capture pattern.", svc:"DynamoDB Streams" },
-
-    { d:"d1", q:"Items in a session table should be automatically removed a set time after creation to control storage cost, without running a cleanup job. What DynamoDB feature does this?",
-      o:["Time to Live (TTL) on an expiry-timestamp attribute","A scheduled Scan-and-delete Lambda","DynamoDB Streams","On-demand capacity mode"],
-      a:[0], e:"DynamoDB TTL deletes items automatically shortly after a specified epoch timestamp attribute passes, at no additional cost and without consuming write capacity for the deletes.", svc:"DynamoDB TTL" },
-
-    { d:"d1", q:"A browser-based chat app needs a persistent, bidirectional connection so the server can push messages to clients in real time through API Gateway. Which API type do you use?",
-      o:["WebSocket API","REST API with polling","HTTP API with CORS","REST API with a Lambda authorizer"],
-      a:[0], e:"API Gateway WebSocket APIs maintain a persistent connection and support server-to-client push via the @connections management API — ideal for real-time chat, notifications, and streaming updates.", svc:"API Gateway WebSocket" },
-
-    { d:"d1", q:"Because an SQS standard queue guarantees at-least-once delivery, a message may occasionally be delivered more than once. What is the recommended way to handle this?",
-      o:["Make the consumer's processing idempotent","Switch every queue to Kinesis","Set the visibility timeout to zero","Enable long polling"],
-      a:[0], e:"Standard queues can deliver duplicates, so consumers should be idempotent — processing the same message twice produces the same result. FIFO queues offer exactly-once processing if strict de-duplication is required.", svc:"SQS delivery semantics" },
-
-    { d:"d1", q:"A Lambda function backing a latency-sensitive API suffers from cold starts at the start of traffic bursts. Which feature keeps a pool of initialized execution environments ready to respond immediately?",
-      o:["Provisioned concurrency","Reserved concurrency","Increasing the memory allocation","A larger deployment package"],
-      a:[0], e:"Provisioned concurrency keeps a specified number of execution environments initialized and warm, eliminating cold-start latency. Reserved concurrency only caps/reserves the maximum count; it does not pre-warm.", svc:"Lambda provisioned concurrency" },
-
-    { d:"d1", q:"When uploading a 5 GB object to S3 reliably over a flaky connection, which approach lets you upload parts in parallel and retry only failed parts?",
-      o:["Multipart upload","A single PutObject call","S3 Transfer Acceleration only","Presigned POST with one part"],
-      a:[0], e:"Multipart upload splits a large object into parts that upload in parallel and can be retried individually. AWS recommends it for objects over 100 MB and requires it above 5 GB (single PUT max).", svc:"S3 multipart upload" },
-
-    { d:"d1", q:"After Amazon S3 introduced strong read-after-write consistency, what can a developer now assume?",
-      o:["A read immediately after a successful write returns the latest object","Reads may return stale data for a few seconds","Only same-region reads are consistent","Consistency requires enabling versioning"],
-      a:[0], e:"S3 now provides strong read-after-write consistency automatically for all GET, PUT, and LIST operations in all regions — a successful write is immediately visible to subsequent reads, with no extra configuration.", svc:"S3 consistency" },
-
-    { d:"d1", q:"A developer wants to run and debug the exact code from many Lambda functions and an API locally before deploying. Which tool provides this?",
-      o:["AWS SAM CLI (sam local invoke / start-api)","CodeBuild local agent","CloudFormation designer","X-Ray daemon"],
-      a:[0], e:"The AWS SAM CLI emulates Lambda and API Gateway locally (sam local invoke, sam local start-api) using Docker, letting you test functions and the API before deploying.", svc:"AWS SAM local testing" },
-
-    { d:"d1", q:"You need to store items larger than the DynamoDB 400 KB item-size limit (for example, large media). What is the recommended pattern?",
-      o:["Store the object in S3 and keep a pointer (object key) in DynamoDB","Compress the item with gzip and store it in DynamoDB","Split the item across multiple tables","Increase the DynamoDB item size limit via a support ticket"],
-      a:[0], e:"DynamoDB items are capped at 400 KB. The standard pattern stores large payloads in S3 and keeps only metadata plus the S3 object key in the DynamoDB item.", svc:"DynamoDB item size limit" },
-
-    { d:"d1", q:"Two clients may update the same DynamoDB item concurrently and you must prevent one from silently overwriting the other's change. Which approach implements optimistic locking?",
-      o:["Add a version attribute and use a ConditionExpression so the write only succeeds if the version matches","Use a Scan before every write","Enable DynamoDB Streams on the table","Increase the write capacity units"],
-      a:[0], e:"Optimistic locking uses a version-number attribute plus a ConditionExpression (e.g., version = :expected). If another client already incremented the version, the conditional write fails with ConditionalCheckFailedException instead of overwriting.", svc:"DynamoDB conditional writes / optimistic locking" },
-
-    { d:"d1", q:"An order and its inventory record live in two DynamoDB items and must both be updated together — all succeed or all fail. Which operation do you use?",
-      o:["TransactWriteItems (DynamoDB transactions)","BatchWriteItem","Two sequential PutItem calls","A DynamoDB Stream that reconciles later"],
-      a:[0], e:"TransactWriteItems provides all-or-nothing ACID writes across one or more items/tables. BatchWriteItem is NOT atomic — individual writes can succeed while others fail — so it does not guarantee the all-or-nothing behavior.", svc:"DynamoDB transactions" },
-
-    { d:"d1", q:"You need to reliably load streaming data into an S3 data lake and Amazon Redshift with automatic buffering and no custom consumer code to manage. Which service fits best?",
-      o:["Amazon Kinesis Data Firehose","Amazon Kinesis Data Streams","Amazon SQS","Amazon MSK"],
-      a:[0], e:"Kinesis Data Firehose is a fully managed delivery stream that buffers and loads data directly into S3, Redshift, OpenSearch, or Splunk with no consumer code. Data Streams requires you to build and manage the consumer application.", svc:"Kinesis Firehose vs Data Streams" },
-
-    { d:"d1", q:"After a consumer receives an SQS message, other consumers must not see it while it is being processed. Which setting controls how long the message stays hidden?",
-      o:["The visibility timeout","The message retention period","The delivery delay","The receive count"],
-      a:[0], e:"When a message is received, SQS hides it for the visibility timeout (default 30s, up to 12h). If the consumer does not delete it within that window, the message becomes visible again for another consumer to retry.", svc:"SQS visibility timeout" },
-
-    { d:"d1", q:"Your SQS consumers make many empty ReceiveMessage calls, wasting requests and money when the queue is often empty. What reduces these empty responses?",
-      o:["Enable long polling by setting ReceiveMessageWaitTimeSeconds (up to 20s)","Lower the visibility timeout to 0","Switch to a FIFO queue","Increase the message retention period"],
-      a:[0], e:"Long polling makes ReceiveMessage wait up to 20 seconds for a message to arrive before returning, eliminating most empty responses and lowering cost. Short polling (0s) returns immediately, producing many empty receives.", svc:"SQS long polling" },
-
-    { d:"d1", q:"Several Lambda functions share the same large set of libraries, bloating each deployment package. How do you share the dependencies across functions?",
-      o:["Package the libraries as a Lambda layer and attach it to each function","Increase each function's memory","Use provisioned concurrency","Store the libraries in DynamoDB"],
-      a:[0], e:"Lambda layers package libraries and other dependencies separately; multiple functions can reference the same layer, keeping individual deployment packages small and centralizing dependency management.", svc:"Lambda layers" },
+    // ===== Domain 1: Development (32%) =====
+    { d:"d1", q:"A developer needs to expose a single Lambda function as a public HTTPS endpoint to receive webhook calls from a third-party SaaS provider. The company does not need request throttling, usage plans, or request transformation. Which solution meets these requirements with the LEAST operational overhead and cost?",
+      o:["Create a Lambda function URL with the appropriate auth type and give the provider the generated HTTPS endpoint","Create a REST API in API Gateway with a Lambda proxy integration, deploy it to a stage, and share the invoke URL","Create an Application Load Balancer with the Lambda function as a target and share the ALB DNS name","Create a CloudFront distribution with Lambda@Edge to process the webhook calls"],
+      a:[0], e:"A Lambda function URL is a built-in, dedicated HTTPS endpoint (auth type AWS_IAM or NONE) with no extra services to configure or pay for. API Gateway or an ALB would also work, but both add cost and management for features the scenario explicitly does not need.", svc:"Lambda function URLs" },
+
+    { d:"d1", q:"A Lambda function downloads sensitive customer files, processes them in its /tmp ephemeral storage, and uploads results to S3. The compliance team requires the temporary file contents to be encrypted at rest with a key the company controls, with every key use auditable in CloudTrail. What should the developer do?",
+      o:["Call KMS GenerateDataKey with a customer managed key and encrypt the files in the function code before writing them to /tmp","Do nothing, because /tmp contents can never be protected with a customer-controlled key","Attach an encrypted EBS volume to the function and process the files there instead of /tmp","Store the working files as items in a DynamoDB table with default encryption instead of using /tmp"],
+      a:[0], e:"Envelope encryption with a customer managed KMS key puts the company in control: every GenerateDataKey and Decrypt call is logged in CloudTrail, and the bytes on /tmp are ciphertext. Lambda cannot attach EBS volumes, and DynamoDB items are capped at 400 KB with an AWS-owned key by default.", svc:"Lambda /tmp + KMS data keys" },
+
+    { d:"d1", q:"A Lambda function running at high concurrency calls AWS Secrets Manager on every invocation to fetch a database credential. The repeated API calls add latency and cost. How can the developer reduce the calls with the LEAST code change?",
+      o:["Add the AWS Parameters and Secrets Lambda Extension layer and read the secret from the extension's local cache endpoint","Copy the secret into a plaintext environment variable at deploy time so no runtime call is needed","Store the secret in an S3 object and download it on every invocation instead","Increase the function's memory allocation so the Secrets Manager calls complete faster"],
+      a:[0], e:"The AWS Parameters and Secrets Lambda Extension caches secrets inside the execution environment and serves them over a local HTTP endpoint, eliminating repeated Secrets Manager calls without rewriting retrieval logic. A plaintext environment variable exposes the secret and breaks rotation.", svc:"Secrets caching in Lambda" },
+
+    { d:"d1", q:"A machine-learning inference function has a 3 GB model file plus dependencies, far exceeding the 250 MB unzipped Lambda deployment package limit. The team wants to keep using Lambda. What should they do?",
+      o:["Package the function and model as a container image of up to 10 GB, push it to Amazon ECR, and create the function from the image","Split the model across multiple Lambda layers to stay under the limit","Open a support ticket to raise the deployment package size limit","Compress the model until the .zip package is under 50 MB"],
+      a:[0], e:"Lambda supports container images up to 10 GB stored in ECR — the standard way to ship large models and dependency stacks. Layers count toward the same 250 MB unzipped limit, and the package size limits are hard limits that cannot be raised.", svc:"Lambda container images" },
+
+    { d:"d1", q:"A Lambda function consumes messages from an SQS queue with a batch size of 10. When one message in a batch fails, the entire batch returns to the queue and already-processed messages run again. Which change stops successful messages from being reprocessed while keeping throughput?",
+      o:["Enable ReportBatchItemFailures on the event source mapping and return only the failed message IDs from the function","Reduce the batch size to 1 so each invocation handles a single message","Increase the queue's visibility timeout so batches never reappear","Convert the queue to FIFO so batches become exactly-once"],
+      a:[0], e:"With partial batch responses (ReportBatchItemFailures), the function reports just the failed item IDs and only those return to the queue. Batch size 1 works but sacrifices throughput, and neither visibility timeout nor FIFO changes the all-or-nothing batch failure behavior.", svc:"Lambda + SQS partial batch responses" },
+
+    { d:"d1", q:"An order service consumes an SQS standard queue with a Lambda function. Because of at-least-once delivery, the same order message is occasionally delivered twice and customers get charged twice. Which solution prevents double processing MOST reliably?",
+      o:["Record each order ID in a DynamoDB table with a conditional write and skip processing when the ID already exists","Add a random delay to each invocation so duplicate deliveries are less likely to overlap","Lower the queue's visibility timeout so duplicates expire sooner","Enable long polling on the queue to reduce duplicate deliveries"],
+      a:[0], e:"An idempotency check — a conditional PutItem with attribute_not_exists on the order ID — turns the second delivery into a no-op, the standard pattern for at-least-once systems. Polling style and visibility settings cannot eliminate duplicates in standard queues.", svc:"Idempotent consumers" },
+
+    { d:"d1", q:"A Node.js Lambda function creates its database connection and AWS SDK clients inside the handler on every invocation, adding avoidable latency to warm requests. What is the AWS-recommended optimization?",
+      o:["Initialize the SDK clients and database connection outside the handler so warm execution environments reuse them across invocations","Increase the function timeout to allow more time for initialization","Publish a new version of the function for every deployment","Invoke the function on a schedule so it never goes cold"],
+      a:[0], e:"Code outside the handler runs once per execution environment and its objects persist across warm invocations, so clients and connections belong there. Timeout changes do not reduce per-invocation setup work, and scheduled pings do not fix in-handler initialization.", svc:"Lambda execution environment reuse" },
+
+    { d:"d1", q:"A Lambda-based API scales to hundreds of concurrent executions at peak, and its Amazon RDS for PostgreSQL database intermittently rejects connections because every execution opens its own. Which solution fixes this with the LEAST application refactoring?",
+      o:["Put Amazon RDS Proxy between the functions and the database so connections are pooled and shared","Migrate the relational schema to DynamoDB, which has no connection limits","Set the function's reserved concurrency to 1 to serialize access","Open and close a fresh connection inside the handler for every query"],
+      a:[0], e:"RDS Proxy maintains a warm, shared connection pool that absorbs Lambda connection storms — usually just a connection-string change. Reserved concurrency of 1 throttles the whole API, and a database migration is a major rewrite.", svc:"Amazon RDS Proxy" },
+
+    { d:"d1", q:"An application uses TransactGetItems to read 3 items per second from a DynamoDB table. Each item is 7 KB. How many read capacity units (RCUs) does this workload consume?",
+      o:["12 RCUs","6 RCUs","3 RCUs","24 RCUs"],
+      a:[0], e:"A strongly consistent read of a 7 KB item needs ceil(7/4) = 2 RCUs, and transactional reads cost 2x strongly consistent, so 4 RCUs per item. At 3 items per second: 3 x 4 = 12 RCUs.", svc:"DynamoDB transactional RCU math" },
+
+    { d:"d1", q:"A DynamoDB table must support 25 eventually consistent reads per second of items that are 13 KB each. How many RCUs must be provisioned?",
+      o:["50 RCUs","100 RCUs","25 RCUs","200 RCUs"],
+      a:[0], e:"Each 13 KB item needs ceil(13/4) = 4 RCUs strongly consistent; eventually consistent reads cost half, so 2 RCUs per read. 25 reads x 2 = 50 RCUs.", svc:"DynamoDB RCU math" },
+
+    { d:"d1", q:"An application performs 10 standard writes per second to a DynamoDB table, and each item is 2.5 KB. How many write capacity units (WCUs) are required?",
+      o:["30 WCUs","25 WCUs","10 WCUs","60 WCUs"],
+      a:[0], e:"Writes cost 1 WCU per 1 KB, rounded up per item: ceil(2.5) = 3 WCUs per write. 10 writes x 3 = 30 WCUs. (Transactional writes would double this to 60.)", svc:"DynamoDB WCU math" },
+
+    { d:"d1", q:"A developer must automatically delete user-session items from a DynamoDB table 30 days after creation and archive each deleted item to Amazon S3 for compliance, without consuming write capacity for the deletions. Which combination achieves this?",
+      o:["Enable TTL on an expiry attribute, enable DynamoDB Streams, and use a Lambda consumer that detects TTL-expired records and writes them to S3","Run a nightly Scan that deletes expired items and copies them to S3","Enable point-in-time recovery and restore expired items to S3 every month","Configure an S3 lifecycle rule on the table's backing storage"],
+      a:[0], e:"TTL deletes expired items at no write-capacity cost, and each deletion appears in the stream marked as a service deletion (the record's userIdentity identifies dynamodb.amazonaws.com), which a Lambda consumer can filter and archive. A nightly Scan burns heavy read and write capacity.", svc:"DynamoDB TTL + Streams archiving" },
+
+    { d:"d1", q:"A Lambda function processes a DynamoDB stream to keep a search index synchronized. The team must ensure that changes to the SAME item are applied to the index in the order they occurred. What does DynamoDB Streams guarantee?",
+      o:["Modifications to a given item appear in the stream in the exact order they occurred, within a shard","All records across the entire table are globally ordered","Ordering is only guaranteed if the table has a single partition","Streams provide no ordering guarantees of any kind"],
+      a:[0], e:"DynamoDB Streams preserves per-item modification order — records for the same key are written to the same shard in sequence. There is no global ordering across different items and shards, which is fine for per-item index updates.", svc:"DynamoDB Streams ordering" },
+
+    { d:"d1", q:"A read-heavy gaming leaderboard makes millions of GetItem and Query calls to DynamoDB and needs microsecond response times. The team tolerates eventually consistent reads and does not want to rewrite query code. Which solution fits?",
+      o:["Add a DAX cluster and point the existing DynamoDB SDK calls at the DAX endpoint","Add ElastiCache for Redis and implement cache-aside logic throughout the application","Enable global tables to serve reads from additional regions","Raise provisioned RCUs until latency reaches microseconds"],
+      a:[0], e:"DAX is an API-compatible, write-through cache for DynamoDB delivering microsecond reads with only a client endpoint change — but it accelerates eventually consistent reads only. ElastiCache demands new caching logic, and no amount of RCUs beats the native single-digit-millisecond floor.", svc:"DynamoDB Accelerator (DAX)" },
+
+    { d:"d1", q:"An orders table uses customer_id as the partition key and order_date as the sort key. A new report must efficiently query all orders for a given product_id, which is a non-key attribute. The table is already serving production traffic. What should the developer create?",
+      o:["A global secondary index with product_id as its partition key","A local secondary index with product_id as its sort key","A second table keyed by product_id, kept in sync by a nightly Scan","A Scan with a FilterExpression on product_id"],
+      a:[0], e:"A GSI supports a completely different partition key and can be added to a live table. LSIs must reuse the base partition key and only exist if created with the table, while Scan + FilterExpression reads (and pays for) the entire table before filtering.", svc:"DynamoDB GSI vs LSI" },
+
+    { d:"d1", q:"Two support agents can edit the same ticket item in DynamoDB simultaneously, and the last save silently overwrites the other agent's changes. Which approach prevents lost updates WITHOUT locking the item?",
+      o:["Keep a version attribute and write with a ConditionExpression requiring the version that was read; handle the failure by re-reading and retrying","Route all writes through a single-threaded worker process to serialize them","Enable strongly consistent reads on every GetItem call","Scan the table before each write to look for recent changes"],
+      a:[0], e:"This is optimistic locking: the conditional update fails with ConditionalCheckFailedException if another writer bumped the version first, so no update is silently lost. Strongly consistent reads alone cannot stop a later overwrite.", svc:"Optimistic locking with ConditionExpression" },
+
+    { d:"d1", q:"When a customer redeems loyalty points, the application must decrement a balance in one DynamoDB table and insert a redemption record into another table, with both changes succeeding or failing together. Which API provides this guarantee?",
+      o:["TransactWriteItems","BatchWriteItem","Two sequential PutItem calls wrapped in a try/catch block","UpdateItem with a ProjectionExpression"],
+      a:[0], e:"TransactWriteItems executes up to 100 write actions across tables as one all-or-nothing ACID transaction. BatchWriteItem is NOT atomic — some writes can succeed while others fail — and sequential calls can leave partial state after a crash.", svc:"DynamoDB transactions" },
+
+    { d:"d1", q:"An application calls the DynamoDB BatchGetItem API directly over HTTP and frequently receives responses containing entries in UnprocessedKeys during traffic peaks. Which TWO actions make the application more resilient? (Choose TWO)",
+      o:["Retry the unprocessed keys using exponential backoff with jitter","Use an AWS SDK, which automatically retries unprocessed items with backoff","Retry the entire batch immediately in a tight loop until it succeeds","Increase the provisioned write capacity of the tables involved","Reduce every item to under 1 KB"],
+      a:[0,1], multi:true, e:"UnprocessedKeys signals throttling or size limits; the remedies are retrying with exponential backoff plus jitter — which the AWS SDKs implement automatically for batch operations. Tight-loop retries intensify throttling, and write capacity has nothing to do with reads.", svc:"BatchGetItem UnprocessedKeys" },
+
+    { d:"d1", q:"A delivery-tracking mobile app needs a GraphQL API where driver location updates are pushed to subscribed customers in real time, with a managed service maintaining the WebSocket connections. Which AWS service should the developer use?",
+      o:["AWS AppSync with GraphQL subscriptions","An API Gateway REST API polled every second by clients","One SQS queue per mobile client","CloudFront with Lambda@Edge functions"],
+      a:[0], e:"AppSync is the managed GraphQL service; subscriptions push mutation results to connected clients over WebSockets that AppSync operates and scales. Polling adds latency and cost, and SQS is not a push channel to mobile clients.", svc:"AWS AppSync subscriptions" },
+
+    { d:"d1", q:"An AppSync GraphQL field must first verify a user's entitlement in DynamoDB and then fetch licensed content from a second data source, running the two operations in sequence for a single query. What should the developer configure?",
+      o:["A pipeline resolver composed of two functions that run in order","Two separate GraphQL endpoints that the client calls in sequence","A unit resolver attached simultaneously to both data sources","An S3 redirect rule between the data sources"],
+      a:[0], e:"Pipeline resolvers chain multiple functions sequentially against different data sources within one field resolution — the check-then-fetch pattern. A unit resolver can target only a single data source.", svc:"AppSync pipeline resolvers" },
+
+    { d:"d1", q:"A field-service mobile app built with AWS Amplify must let technicians view and edit work orders while OFFLINE, then automatically synchronize changes with conflict resolution to the cloud backend when connectivity returns. Which capability provides this?",
+      o:["Amplify DataStore backed by an AppSync GraphQL API","Direct DynamoDB SDK calls from the mobile app","S3 Transfer Acceleration for faster uploads","Cognito unauthenticated guest access"],
+      a:[0], e:"Amplify DataStore is an on-device store with automatic bidirectional sync and configurable conflict resolution through AppSync — built for offline-first apps. Direct DynamoDB calls simply fail offline and offer no sync engine.", svc:"Amplify DataStore offline sync" },
+
+    { d:"d1", q:"A company serves an API whose consumers all run inside the same AWS Region. The team also plans to put its OWN CloudFront distribution with a custom AWS WAF configuration in front of the API. Which API Gateway endpoint type should they choose?",
+      o:["Regional","Edge-optimized","Private","A separate API per Availability Zone"],
+      a:[0], e:"Regional endpoints skip the API Gateway managed CloudFront layer — the right choice for same-region callers and required when you attach your own CloudFront distribution. Edge-optimized endpoints bundle a managed CloudFront you cannot customize; private endpoints are reachable only from a VPC.", svc:"API Gateway endpoint types" },
+
+    { d:"d1", q:"A REST API in API Gateway fronts a legacy backend that expects a differently shaped JSON payload than clients send. The transformation must happen WITHOUT changing client or backend code. What should the developer configure?",
+      o:["A non-proxy (custom) integration with a VTL mapping template on the integration request","A Lambda proxy integration, which transforms payloads automatically","A gateway response override for the 4xx family","A usage plan with an API key requirement"],
+      a:[0], e:"Mapping templates (Velocity Template Language) reshape requests and responses in non-proxy integrations with zero code changes on either side. Proxy integrations pass requests through untouched, forcing the transformation into backend code.", svc:"API Gateway mapping templates" },
+
+    { d:"d1", q:"A team is building a simple, low-latency HTTP front door for a Lambda function. They need built-in JWT authorization against an OpenID Connect provider and the lowest per-request price. They do NOT need usage plans, API keys, or response caching. Which API Gateway option fits?",
+      o:["An HTTP API","A REST API","A WebSocket API","A REST API with an edge-optimized endpoint"],
+      a:[0], e:"HTTP APIs cost less, add less latency, and include native JWT authorizers for OIDC/OAuth2. REST APIs earn their premium only for features like usage plans, API keys, request validation, and caching — all explicitly unneeded here.", svc:"HTTP API vs REST API" },
+
+    { d:"d1", q:"A SaaS company monetizes its REST API with Basic and Premium tiers that carry different request rates and monthly quotas per customer. Which API Gateway feature implements the tiers?",
+      o:["Usage plans with API keys distributed to each customer","Per-customer reserved concurrency on the backing Lambda","A CORS configuration per stage","Stage variables holding each customer's limit"],
+      a:[0], e:"Usage plans bind API keys to throttle rates and quotas, giving each customer a measurable tier on REST APIs. Reserved concurrency limits the backend function globally — it cannot distinguish customers.", svc:"API Gateway usage plans" },
+
+    { d:"d1", q:"An e-commerce platform emits order events consumed by several teams: fraud analysis needs only orders over $1,000, notifications needs all orders, and analytics needs orders from one country. Each team owns its own queue or function. Which architecture routes the events with the LEAST custom code?",
+      o:["Publish the events to an EventBridge event bus and create one rule per team with an event pattern that filters and routes to that team's target","Publish to a single SQS queue read by a router Lambda that filters and forwards messages","Write every event to DynamoDB and have each team poll the table with filters","Deliver every event to every team and have each consumer discard what it does not need"],
+      a:[0], e:"EventBridge rules match event content declaratively and fan out to per-team targets — no router code to write, scale, or debug. A router Lambda or consumer-side discarding moves filtering into code someone must maintain forever.", svc:"EventBridge content-based routing" },
 
-    { d:"d1", q:"You need to run a very high volume of short-duration state machine executions (e.g., per-event processing) at the lowest cost, with at-least-once execution. Which Step Functions workflow type fits?",
-      o:["Express workflow","Standard workflow","A single Lambda with a loop","EventBridge Pipes only"],
-      a:[0], e:"Express workflows are optimized for high-volume, short-duration (≤5 minutes) event-processing workloads and are billed by number/duration of executions. Standard workflows suit long-running, auditable, exactly-once processes.", svc:"Step Functions Express vs Standard" },
+    { d:"d1", q:"A payments system requires transactions for the SAME account to process strictly in order, while transactions for different accounts should process in parallel for throughput. How should the developer configure Amazon SQS?",
+      o:["Use a FIFO queue with the account ID as the message group ID","Use a FIFO queue with one global message group ID for every message","Use a standard queue and embed sequence numbers in each payload","Create one standard queue per customer account"],
+      a:[0], e:"FIFO ordering applies per message group: keying the group ID by account serializes each account's messages while different groups process concurrently. A single group ID forces global serial processing and destroys throughput.", svc:"SQS FIFO message groups" },
 
-    { d:"d1", q:"You want to route events from many AWS services and SaaS partners to different targets based on the event content, using rules and a schema registry. Which service is designed for this?",
-      o:["Amazon EventBridge","Amazon SQS","AWS Step Functions","Amazon Kinesis Data Streams"],
-      a:[0], e:"EventBridge is a serverless event bus that filters and routes events from AWS services, custom apps, and SaaS partners to targets using content-based rules, with a schema registry for discovering event structures.", svc:"Amazon EventBridge" },
+    { d:"d1", q:"Consumers of an SQS standard queue take about 45 seconds to process each message, but the queue's visibility timeout is 30 seconds. Users are reporting duplicated side effects. What is happening, and what is the fix?",
+      o:["In-flight messages become visible again before processing finishes and are delivered to another consumer; raise the visibility timeout above worst-case processing time or extend it with ChangeMessageVisibility","The queue is dropping messages under load; attach a dead-letter queue","Short polling is causing duplicates; switch to long polling","The retention period is too short; increase it to the maximum"],
+      a:[0], e:"When processing outlives the visibility timeout, SQS re-delivers the message to another consumer — the classic duplicate-processing cause. Set the timeout comfortably above processing time, or heartbeat with ChangeMessageVisibility. Long polling only reduces empty receives.", svc:"SQS visibility timeout tuning" },
 
-    { d:"d1", q:"You have one API Gateway definition but need it to call a different Lambda alias in your dev, test, and prod stages without changing the integration setup. What do you use?",
-      o:["Stage variables referenced in the integration URI","A separate API per stage","A usage plan per stage","A mapping template per stage"],
-      a:[0], e:"Stage variables are name-value pairs tied to a stage; you can reference them in the integration (e.g., the Lambda alias or endpoint) so the same API deployment targets different backends per stage.", svc:"API Gateway stage variables" },
+    { d:"d1", q:"A single SNS topic receives all inventory events. The shipping service must receive ONLY events where eventType is ORDER_SHIPPED and the billing service only ORDER_PAID, each in its own SQS queue, with no consumer-side filtering code. How is this implemented?",
+      o:["Subscribe each queue to the topic and attach a subscription filter policy matching that service's event type attribute","Create one SNS topic per event type and publish every event to all of them","Use a FIFO topic so events are routed by type automatically","Let each service receive everything and drop the messages it does not need"],
+      a:[0], e:"SNS subscription filter policies evaluate message attributes and deliver only matching messages to each subscription, preserving fan-out with zero consumer filtering. Duplicating topics multiplies producer logic and cost.", svc:"SNS subscription filter policies" },
 
-    { d:"d1", q:"You need an index on a DynamoDB table that uses a DIFFERENT partition key from the base table, and it can be added after the table already exists. Which index type is this?",
-      o:["A Global Secondary Index (GSI)","A Local Secondary Index (LSI)","A composite primary key","A DynamoDB Stream"],
-      a:[0], e:"A GSI can have a different partition and sort key from the base table and can be created at any time. An LSI shares the table's partition key (different sort key only) and must be created when the table is created.", svc:"DynamoDB GSI vs LSI" },
+    { d:"d1", q:"A data pipeline must run a series of business-rule transformations in strict sequence, retry individual steps on transient errors with backoff, and route failed records into a remediation path. The company wants a scalable solution with the LEAST maintenance. Which service should orchestrate the flow?",
+      o:["AWS Step Functions with Retry and Catch configured on each state","A cron job on an EC2 instance running the rules as one script","Lambda functions that invoke each other directly in a chain","A single long-running container that loops over the rules"],
+      a:[0], e:"Step Functions expresses sequential states declaratively with built-in Retry (exponential backoff) and Catch (error routing), no servers, and per-step execution history. Chained Lambdas bury orchestration in code where retries and error paths are hard to see and change.", svc:"Step Functions error handling" },
 
-    { d:"d1", q:"Your app caches DB query results but you want the cache to only load data on a miss, minimizing memory used for rarely read items. Which caching strategy is this?",
-      o:["Lazy loading (cache-aside)","Write-through","Read-through with TTL disabled","Write-behind"],
-      a:[0], e:"Lazy loading (cache-aside) writes to the cache only when a read misses, so only requested data is cached — but data can become stale. Write-through updates the cache on every write, keeping it fresh at the cost of caching data that may never be read.", svc:"ElastiCache caching strategies" },
+    { d:"d1", q:"A document-approval workflow in Step Functions must pause at a review step until a human approves the document in an external web application — potentially days later — then continue with the result. Which pattern implements the pause?",
+      o:["A callback task with waitForTaskToken; the web app resumes the execution by calling SendTaskSuccess with the stored token","An Express workflow containing a long Wait state","A Lambda task that sleeps until the review is complete","A Parallel state that polls the web application every second"],
+      a:[0], e:"The .waitForTaskToken service integration pauses the execution until SendTaskSuccess or SendTaskFailure is called with the token — the standard human-in-the-loop pattern (Standard workflows can wait up to a year). Express workflows cap at 5 minutes, and a sleeping Lambda bills for idle time and dies at 15 minutes.", svc:"Step Functions callback pattern" },
 
-    { d:"d1", q:"When a new object is uploaded to an S3 bucket, a Lambda function must process it immediately. What is the simplest way to trigger the function?",
-      o:["Configure an S3 event notification (s3:ObjectCreated:*) targeting the Lambda function","Poll the bucket every minute with EventBridge Scheduler","Enable S3 Transfer Acceleration","Turn on S3 versioning"],
-      a:[0], e:"S3 event notifications fire on events like object creation and can invoke Lambda directly (or send to SNS/SQS/EventBridge). This is the standard event-driven pattern for processing new objects without polling.", svc:"S3 event notifications" },
+    { d:"d1", q:"A clickstream platform must ingest ordered event data that MULTIPLE independent analytics applications will each read in full, with the ability to replay the previous 24 hours of data. Which service meets these requirements?",
+      o:["Kinesis Data Streams","An SQS standard queue","An SQS FIFO queue","An SNS topic with queue subscriptions"],
+      a:[0], e:"Kinesis retains records (24 hours by default, extensible to 365 days) so multiple consumers independently read and replay the same ordered stream. SQS delivers each message to one consumer and deletes it afterward — no replay and no multi-reader model.", svc:"Kinesis vs SQS" },
 
-    { d:"d1", q:"Multiple concurrent Lambda functions need shared, persistent POSIX file storage that survives beyond a single invocation. What should you attach?",
-      o:["Amazon EFS mounted to the functions","Larger /tmp ephemeral storage","An EBS volume","An instance store volume"],
-      a:[0], e:"Lambda can mount an Amazon EFS file system, giving all concurrent invocations shared, persistent POSIX storage. Ephemeral /tmp is per-execution-environment and not shared or durable; Lambda cannot attach EBS or instance-store volumes.", svc:"Lambda + EFS" },
+    { d:"d1", q:"Five consumer applications read the same Kinesis data stream and now suffer growing read latency because they share each shard's 2 MB/s read throughput. Which change gives EACH consumer dedicated throughput with push-based delivery?",
+      o:["Register each application as an enhanced fan-out consumer so each receives a dedicated 2 MB/s per shard via SubscribeToShard","Double the number of shards in the stream","Consolidate all applications behind one shared GetRecords poller","Reduce the stream retention period to lower read contention"],
+      a:[0], e:"Enhanced fan-out gives every registered consumer its own 2 MB/s per shard with HTTP/2 push delivery, removing contention between consumers. Adding shards raises aggregate capacity, but standard consumers still share each shard's read limit.", svc:"Kinesis enhanced fan-out" },
 
-    { d:"d1", q:"Your table read returns large items but the app only needs two attributes. How do you reduce the amount of data read and returned by DynamoDB?",
-      o:["Use a ProjectionExpression to return only the needed attributes","Use a Scan with a FilterExpression","Increase provisioned read capacity","Enable DynamoDB Accelerator (DAX)"],
-      a:[0], e:"A ProjectionExpression limits which attributes are returned, reducing response payload. Note a FilterExpression does NOT reduce read-capacity consumption — items are read first, then filtered — so projections plus targeted Query are the efficient approach.", svc:"DynamoDB ProjectionExpression" },
+    { d:"d1", q:"A web application lets users upload video files of up to 4 GB. The current design posts files through API Gateway to a Lambda function and fails because of payload limits. Which redesign is MOST scalable?",
+      o:["Return an S3 presigned URL from the backend and have the browser upload directly to S3, using multipart upload for the large files","Request an API Gateway payload limit increase from AWS Support","Split each file into 5 MB chunks and post every chunk through the Lambda function","Store the videos as binary attributes in DynamoDB"],
+      a:[0], e:"Presigned URLs let clients upload directly and securely to S3, bypassing the ~10 MB API Gateway and 6 MB Lambda payload limits entirely; multipart upload adds parallelism and per-part retries. Those payload limits are hard limits, and DynamoDB items cap at 400 KB.", svc:"S3 presigned direct uploads" },
 
-    { d:"d1", q:"Your application must send SQS messages whose payloads exceed the 256 KB message size limit. What is the recommended approach?",
-      o:["Store the payload in S3 and send a reference using the SQS Extended Client Library","Split the payload across multiple messages and reassemble","Compress every message to fit under 256 KB always","Switch to a FIFO queue to raise the limit"],
-      a:[0], e:"The Amazon SQS Extended Client Library stores large payloads (up to 2 GB) in S3 and sends a message containing a reference to the S3 object, transparently handling storage and retrieval. The raw SQS limit is 256 KB.", svc:"SQS large payloads (Extended Client)" },
+    { d:"d1", q:"A developer lists resources through an AWS SDK call and receives only the first page of results even though thousands more exist. What is the correct way to retrieve the complete result set?",
+      o:["Use the SDK's paginators, or loop passing the returned NextToken/continuation token until none is returned","Increase the SDK's socket timeout so more results can arrive","Set MaxResults to an unlimited value in a single call","Sign the request manually with SigV4 to unlock full results"],
+      a:[0], e:"List APIs return one page plus a continuation token; paginators (or a token loop) fetch successive pages until the token is absent. MaxResults has service-defined caps, and neither timeouts nor manual signing changes pagination.", svc:"SDK pagination" },
 
-    // ===== Domain 2: Security =====
-    { d:"d2", q:"A mobile app authenticates users, then needs to give each signed-in user temporary AWS credentials to upload directly to their own S3 prefix. Which Cognito feature provides the AWS credentials?",
-      o:["Cognito identity pools (federated identities)","Cognito user pools","AWS IAM users, one per app user","A shared IAM access key in the app"],
-      a:[0], e:"Cognito user pools handle authentication (sign-up/sign-in, a user directory, JWTs). Cognito identity pools exchange a validated identity for temporary, limited AWS credentials via STS so users can call AWS services directly.", svc:"Cognito user vs identity pools" },
-
-    { d:"d2", q:"You must store an RDS database password and rotate it automatically every 30 days with a managed rotation function. Which service is purpose-built for this?",
-      o:["AWS Secrets Manager","SSM Parameter Store SecureString","AWS KMS","AWS Config"],
-      a:[0], e:"Secrets Manager natively supports scheduled automatic rotation with built-in Lambda rotation functions for RDS and other services. Parameter Store SecureString can hold secrets but has no built-in automatic rotation.", svc:"Secrets Manager rotation" },
-
-    { d:"d2", q:"An EC2 application must call AWS APIs. What is the most secure way to provide it with credentials?",
-      o:["Attach an IAM role to the EC2 instance (instance profile)","Store IAM access keys in a file on the instance","Pass access keys as environment variables","Embed access keys in the application code"],
-      a:[0], e:"IAM roles deliver temporary, automatically rotated credentials via the instance metadata service — no long-term keys to store, leak, or rotate manually. Hard-coded or stored access keys are an anti-pattern.", svc:"IAM roles for EC2" },
-
-    { d:"d2", q:"How does an application in Account A gain temporary permission to access an S3 bucket in Account B?",
-      o:["Call STS AssumeRole on a role in Account B that trusts Account A","Create an IAM user in Account B and share its keys","Make the bucket public","Use the root credentials of Account B"],
-      a:[0], e:"Cross-account access uses STS AssumeRole: Account B defines a role with a trust policy allowing Account A, and Account A assumes it to receive temporary credentials — no shared long-term keys.", svc:"STS AssumeRole (cross-account)" },
-
-    { d:"d2", q:"You must encrypt S3 objects and also keep a detailed audit trail of who used the encryption key and when, with the ability to control and rotate the key. Which encryption option fits best?",
-      o:["SSE-KMS","SSE-S3","SSE-C","No encryption, use a bucket policy"],
-      a:[0], e:"SSE-KMS uses AWS KMS keys that give you key policies, rotation, and CloudTrail logging of every key use (audit trail). SSE-S3 uses AWS-managed keys with no per-request audit visibility or customer key control.", svc:"S3 SSE-KMS vs SSE-S3" },
-
-    { d:"d2", q:"In IAM policy evaluation, an identity-based policy allows an action but a separate policy contains an explicit deny for it. What is the result?",
-      o:["The request is denied — an explicit deny always overrides any allow","The request is allowed — allow wins","It depends on policy order","The request is allowed only within the same account"],
-      a:[0], e:"IAM evaluation logic: an explicit Deny always overrides any Allow. Access is granted only if there is an applicable Allow and no explicit Deny anywhere that applies.", svc:"IAM policy evaluation" },
-
-    { d:"d2", q:"KMS can directly encrypt only small payloads (up to 4 KB). How do you efficiently encrypt a large file using KMS?",
-      o:["Use envelope encryption: GenerateDataKey, encrypt data locally with the plaintext data key, store the encrypted data key","Call KMS Encrypt repeatedly on 4 KB chunks","Export the KMS key material and encrypt locally","Increase the KMS payload limit in the console"],
-      a:[0], e:"Envelope encryption: KMS generates a data key; you encrypt the large data locally with the plaintext data key, then store the KMS-encrypted copy of that data key alongside the ciphertext. This is how AWS SSE and the Encryption SDK work.", svc:"KMS envelope encryption" },
-
-    { d:"d2", q:"You need to grant a user temporary, time-limited access to download a single private S3 object without changing bucket permissions or making it public. What do you generate?",
-      o:["A presigned URL","A public-read ACL on the object","A new IAM user with S3 read access","A bucket policy allowing anonymous GET"],
-      a:[0], e:"A presigned URL embeds the requester's credentials and an expiry, granting temporary access to a specific object. It requires no permission changes and is ideal for short-lived, controlled downloads/uploads.", svc:"S3 presigned URLs" },
-
-    { d:"d2", q:"For low-cost storage of non-rotating application configuration values — some plaintext, some encrypted — with hierarchical paths, which service is the most cost-effective choice?",
-      o:["SSM Parameter Store (String and SecureString parameters)","AWS Secrets Manager","AWS AppConfig only","Encrypted DynamoDB table"],
-      a:[0], e:"Parameter Store stores configuration and secrets (SecureString, encrypted with KMS) at no additional charge for standard parameters, with hierarchical paths. Secrets Manager costs per secret and adds rotation you may not need here.", svc:"Parameter Store vs Secrets Manager" },
-
-    { d:"d2", q:"After a user authenticates with a Cognito user pool, which token should the application send to authorize calls to a protected resource server / API scope?",
-      o:["The access token","The ID token","The refresh token","The AWS secret access key"],
-      a:[0], e:"The access token carries scopes/groups and is used to authorize API access to resource servers. The ID token carries identity claims about the user (who they are). The refresh token is used only to obtain new tokens.", svc:"Cognito JWT tokens" },
-
-    { d:"d2", q:"Which type of policy is an S3 bucket policy, and what does that let you do that an identity-based policy cannot?",
-      o:["A resource-based policy — it can grant access to principals in other accounts directly on the resource","An identity-based policy — attached to users only","A permissions boundary","A service control policy (SCP)"],
-      a:[0], e:"Bucket policies are resource-based policies attached to the resource itself and include a Principal element, so they can grant cross-account access directly. Identity-based policies attach to IAM users/roles/groups and have no Principal.", svc:"Resource-based vs identity-based policies" },
-
-    { d:"d2", q:"An IAM policy should follow least privilege for an app that only reads objects from one specific bucket. Which statement is correct?",
-      o:["Allow s3:GetObject on arn:aws:s3:::my-bucket/*","Allow s3:* on arn:aws:s3:::*","Allow * on *","Allow s3:GetObject on arn:aws:s3:::*"],
-      a:[0], e:"Least privilege grants only the needed action (s3:GetObject) on only the needed resource (objects in my-bucket). Wildcards on actions or all buckets grant far more than required.", svc:"IAM least privilege" },
-
-    { d:"d2", q:"Requests to AWS service APIs must be cryptographically signed. Which signing process do the AWS SDKs use automatically?",
-      o:["Signature Version 4 (SigV4)","OAuth 2.0 client credentials","Basic authentication","API key headers only"],
-      a:[0], e:"AWS SDKs sign requests with Signature Version 4 (SigV4), using your credentials plus request details and a time stamp to produce a signature, protecting against tampering and replay. Manual API calls must also use SigV4.", svc:"SigV4 request signing" },
-
-    { d:"d2", q:"You want an audit log of every management API call made in your AWS account — who did what, when, and from where — for security and compliance. Which service records this?",
-      o:["AWS CloudTrail","Amazon CloudWatch Metrics","AWS Config","VPC Flow Logs"],
-      a:[0], e:"CloudTrail records account activity — API calls and console actions — including identity, time, source IP, and parameters, for governance, compliance, and security auditing. CloudWatch handles metrics/logs of operational data, not the API audit trail.", svc:"CloudTrail" },
-
-    { d:"d2", q:"For a customer managed KMS key, you want the key material rotated automatically on a yearly schedule with no application changes. What do you enable?",
-      o:["Automatic key rotation on the KMS key","A new key each month created by a Lambda","Manual re-encryption of all data","Envelope encryption only"],
-      a:[0], e:"Enabling automatic rotation on a customer managed key rotates the backing key material once per year while keeping the same key ID/ARN, so applications and ciphertext references need no changes — KMS tracks which version to use for decryption.", svc:"KMS automatic key rotation" },
-
-    { d:"d2", q:"You must give another AWS principal permission to use a KMS key for a limited, temporary, programmatic grant without editing the key policy. Which mechanism fits?",
-      o:["A KMS grant","A wider key policy statement","An IAM permissions boundary","A bucket policy"],
-      a:[0], e:"KMS grants provide temporary, granular, programmatic delegation of key usage (often used by AWS services), and can be retired/revoked when no longer needed. The key policy is the primary, more static access control on the key itself.", svc:"KMS grants vs key policy" },
-
-    { d:"d2", q:"A Lambda function needs to write to DynamoDB and read from S3. How does the function receive permission to call these AWS services?",
-      o:["Through its Lambda execution role (an IAM role)","By storing IAM access keys in environment variables","By using the AWS account root user","By attaching a resource-based policy to the function"],
-      a:[0], e:"Every Lambda function assumes an execution role — an IAM role whose policies grant the AWS API permissions the function needs. AWS provides temporary credentials for that role automatically; you never embed long-term keys.", svc:"Lambda execution role" },
-
-    { d:"d2", q:"You want to protect an API Gateway/CloudFront-fronted app from common web exploits such as SQL injection and cross-site scripting using managed rule groups. Which service do you use?",
-      o:["AWS WAF","AWS Shield Standard only","Amazon GuardDuty","AWS Config"],
-      a:[0], e:"AWS WAF filters HTTP(S) requests with rules (including AWS Managed Rules) to block SQL injection, XSS, bad bots, and rate-based floods. It attaches to CloudFront, ALB, API Gateway, and AppSync. GuardDuty is threat detection, not request filtering.", svc:"AWS WAF" },
-
-    { d:"d2", q:"You need to provision and automatically renew a free public TLS/SSL certificate for an application behind CloudFront or an ALB. Which service manages this?",
-      o:["AWS Certificate Manager (ACM)","AWS KMS","AWS Secrets Manager","IAM server certificates only"],
-      a:[0], e:"ACM provisions, manages, and auto-renews public TLS certificates at no cost for use with integrated services like CloudFront, ALB, and API Gateway, removing manual certificate rotation. KMS handles encryption keys, not TLS certificates.", svc:"AWS Certificate Manager" },
-
-    { d:"d2", q:"To ensure no S3 bucket in your account can accidentally be made public by an ACL or bucket policy, what is the recommended account-level control?",
-      o:["Enable S3 Block Public Access","Add a Deny-all bucket policy to every bucket","Turn on S3 versioning","Enable SSE-KMS on all buckets"],
-      a:[0], e:"S3 Block Public Access provides account- and bucket-level settings that override and prevent public ACLs and policies, acting as a guardrail against accidental public exposure. Encryption and versioning address different risks.", svc:"S3 Block Public Access" },
-
-    { d:"d2", q:"You delegate IAM user/role creation to a team but must guarantee they can never grant more than a fixed set of permissions, regardless of the policies they attach. What do you use?",
-      o:["A permissions boundary","A resource-based policy","A trust policy","An access control list"],
-      a:[0], e:"A permissions boundary is a managed policy that sets the MAXIMUM permissions an IAM entity can have; effective permissions are the intersection of the boundary and the attached policies. It is ideal for safe permission delegation.", svc:"IAM permissions boundary" },
-
-    { d:"d2", q:"EC2 instances in a private subnet must reach Amazon S3 without traversing the public internet or a NAT gateway. What should you configure?",
-      o:["A gateway VPC endpoint for S3","An internet gateway","A public IP on each instance","A presigned URL for every object"],
-      a:[0], e:"A gateway VPC endpoint routes traffic to S3 (and DynamoDB) privately over the AWS network via route-table entries, with no internet gateway or NAT required. It also lets you restrict access with endpoint policies.", svc:"VPC endpoints for S3" },
-
-    { d:"d2", q:"You must allow an S3 action only when the caller has authenticated with MFA. Which IAM policy element enforces this?",
-      o:["A Condition using aws:MultiFactorAuthPresent","A wildcard Resource","A Principal element","A NotAction element"],
-      a:[0], e:"IAM Condition keys refine when a statement applies. aws:MultiFactorAuthPresent (true) restricts the permission to requests made with MFA. Other condition keys include aws:SourceIp, aws:RequestedRegion, and aws:PrincipalTag.", svc:"IAM policy conditions" },
-
-    { d:"d2", q:"Your web app must let users sign in with their existing Google or corporate SAML identities and still get Cognito-issued tokens. Which capability provides this?",
-      o:["Cognito user pool identity federation with external identity providers","Creating an IAM user per end user","Hard-coding an app-wide access key","Using only Secrets Manager"],
-      a:[0], e:"Cognito user pools support federation with social (Google, Facebook, Apple) and enterprise SAML/OIDC identity providers, so users authenticate with an external IdP while Cognito issues standard JWT tokens to your app.", svc:"Cognito identity federation" },
-
-    { d:"d2", q:"You must serve private media files through CloudFront so that only authorized users, for a limited time, can access them. Which feature provides this?",
-      o:["CloudFront signed URLs or signed cookies","Making the S3 bucket public","A CloudFront default root object","An S3 bucket ACL for everyone"],
-      a:[0], e:"CloudFront signed URLs (single file) and signed cookies (multiple files) grant time-limited access to private content served through CloudFront, typically paired with Origin Access Control so the origin bucket stays private.", svc:"CloudFront signed URLs/cookies" },
-
-    { d:"d2", q:"A security review requires all data moving between your clients and your API to be encrypted in transit. What is the primary way this is achieved?",
-      o:["Enforce HTTPS/TLS on the endpoints","Enable SSE-S3 on the buckets","Rotate KMS keys yearly","Use a permissions boundary"],
-      a:[0], e:"Encryption in transit is provided by TLS (HTTPS). You enforce it on endpoints (e.g., API Gateway HTTPS-only, CloudFront viewer protocol policy, S3 aws:SecureTransport condition). SSE and KMS rotation address encryption at rest, not in transit.", svc:"Encryption in transit (TLS)" },
-
-    { d:"d2", q:"When a third party assumes a role in your account on behalf of many customers, how do you prevent the 'confused deputy' problem so they can only assume it for the right customer?",
-      o:["Require a unique External ID in the role's trust policy","Share your account's root credentials","Make the role trust every AWS account","Disable MFA on the role"],
-      a:[0], e:"The External ID is a secret agreed value the third party must pass in the sts:AssumeRole call, matched by a condition in the trust policy. It prevents a confused-deputy attack where one customer tricks the third party into accessing another customer's account.", svc:"STS External ID (confused deputy)" },
-
-    { d:"d2", q:"Which service continuously analyzes CloudTrail, VPC Flow Logs, and DNS logs to detect threats such as compromised credentials or crypto-mining, with no agents to deploy?",
-      o:["Amazon GuardDuty","AWS WAF","AWS Config","Amazon Inspector"],
-      a:[0], e:"GuardDuty is a managed threat-detection service that continuously analyzes account and network activity (CloudTrail, VPC Flow Logs, DNS logs) using ML and threat intel to surface findings, without deploying agents. Inspector scans for software vulnerabilities.", svc:"Amazon GuardDuty" },
-
-    { d:"d2", q:"You need to continuously scan your EC2 instances, container images in ECR, and Lambda functions for software vulnerabilities and unintended network exposure. Which service is purpose-built for this?",
-      o:["Amazon Inspector","Amazon GuardDuty","AWS WAF","AWS CloudTrail"],
-      a:[0], e:"Amazon Inspector automatically discovers and scans EC2, ECR container images, and Lambda functions for known software vulnerabilities (CVEs) and network reachability issues, producing prioritized findings. GuardDuty detects active threats; Inspector assesses vulnerabilities.", svc:"Amazon Inspector" },
-
-    // ===== Domain 3: Deployment =====
-    { d:"d3", q:"During a Lambda deployment you want to shift 10% of traffic to the new version, watch CloudWatch alarms for 10 minutes, then shift the remaining 90%. Which CodeDeploy configuration is this?",
-      o:["Canary (e.g., Canary10Percent10Minutes)","Linear (e.g., Linear10PercentEvery1Minute)","All-at-once","Blue/green with a full cutover"],
-      a:[0], e:"A canary shifts a small percentage first, waits a set interval to observe, then shifts the rest in one step. Linear shifts equal increments on a schedule; all-at-once cuts over immediately.", svc:"CodeDeploy Lambda canary" },
-
-    { d:"d3", q:"You want to preview exactly which resources CloudFormation will add, modify, or delete before applying an update to a production stack. What do you use?",
-      o:["A change set","A stack policy","Drift detection","A nested stack"],
-      a:[0], e:"Change sets show a preview of the proposed changes (add/modify/replace/delete) so you can review the impact — especially resource replacements — before executing the update.", svc:"CloudFormation change sets" },
-
-    { d:"d3", q:"Which intrinsic function returns the value of an attribute (such as an ARN or endpoint) from a resource defined elsewhere in the same CloudFormation template?",
-      o:["!GetAtt","!Ref","!Sub","!FindInMap"],
-      a:[0], e:"Fn::GetAtt (!GetAtt) returns a named attribute of a resource (e.g., an S3 bucket's Arn, an RDS endpoint). !Ref returns a resource's default value (often its physical ID or name), not arbitrary attributes.", svc:"CloudFormation intrinsic functions" },
-
-    { d:"d3", q:"You want a simplified way to define serverless resources (functions, APIs, tables) that transforms into full CloudFormation at deploy time. Which is it?",
-      o:["AWS SAM (Serverless Application Model), via Transform: AWS::Serverless-2016-10-31","AWS CDK in Java only","Elastic Beanstalk","CodeStar"],
-      a:[0], e:"SAM is a CloudFormation extension: the Transform macro expands concise AWS::Serverless::* resources into standard CloudFormation. It streamlines defining Lambda, API Gateway, and DynamoDB for serverless apps.", svc:"AWS SAM" },
-
-    { d:"d3", q:"An Elastic Beanstalk web app must deploy with zero downtime and, if the new version is faulty, avoid impacting capacity on existing instances. Which deployment policy launches a full new set of instances and swaps only when healthy?",
-      o:["Immutable","All at once","Rolling","In-place with a stack policy"],
-      a:[0], e:"The immutable policy deploys the new version onto a fresh set of instances in a new Auto Scaling group; if they pass health checks, traffic swaps over and the old instances are terminated — safest with easy rollback. All-at-once causes downtime; rolling reduces capacity during deploy.", svc:"Elastic Beanstalk deployment policies" },
-
-    { d:"d3", q:"You want to shift traffic between two Lambda versions gradually using a stable pointer that never changes for callers. What do you configure?",
-      o:["A Lambda alias with weighted routing between two versions","Two separate functions and a Route 53 record","Environment variables toggling the version","A new function URL per version"],
-      a:[0], e:"A Lambda alias is a named pointer to a version; callers invoke the alias. Weighted aliases route a percentage of invocations to two versions, enabling gradual/canary traffic shifting without callers changing anything.", svc:"Lambda versions & aliases" },
-
-    { d:"d3", q:"In a CodeBuild project, where do you define the build phases and commands (install, pre_build, build, post_build) and the output artifacts?",
-      o:["A buildspec.yml file","An appspec.yml file","A Dockerfile","A CloudFormation template"],
-      a:[0], e:"CodeBuild uses buildspec.yml to define phases (install, pre_build, build, post_build), environment variables, and artifacts. appspec.yml is used by CodeDeploy to control deployment lifecycle hooks.", svc:"CodeBuild buildspec" },
-
-    { d:"d3", q:"CodeDeploy needs to know how to deploy your app and which lifecycle-hook scripts to run (e.g., BeforeInstall, AfterInstall). Which file provides this?",
-      o:["appspec.yml (or appspec.yaml)","buildspec.yml","cfn-template.yaml","taskdef.json only"],
-      a:[0], e:"The AppSpec file tells CodeDeploy what to deploy and defines lifecycle event hooks that run scripts (validation, config) at each stage. For ECS/Lambda it also defines the target and traffic-shifting settings.", svc:"CodeDeploy AppSpec" },
-
-    { d:"d3", q:"You want to share an output value (like a VPC ID) from one CloudFormation stack so another stack can import it. Which mechanism do you use?",
-      o:["Export the output and use Fn::ImportValue in the other stack","Hard-code the value in both templates","Use a mapping","Use a stack policy"],
-      a:[0], e:"Cross-stack references use Outputs with an Export name in the producing stack and Fn::ImportValue in the consuming stack. Exported values cannot be deleted or modified while another stack imports them.", svc:"CloudFormation cross-stack exports" },
-
-    { d:"d3", q:"When you delete a CloudFormation stack, you must keep a specific S3 bucket and its data intact. What do you set on that resource?",
-      o:["DeletionPolicy: Retain","DeletionPolicy: Delete","A stack policy denying updates","DependsOn on the bucket"],
-      a:[0], e:"DeletionPolicy: Retain keeps the resource (and its data) when the stack is deleted or the resource is removed. The default is Delete; Snapshot is available for resources that support snapshots (e.g., RDS, EBS).", svc:"CloudFormation DeletionPolicy" },
-
-    { d:"d3", q:"You need to store and version your Docker container images so ECS/Fargate tasks can pull them. Which service stores the images?",
-      o:["Amazon ECR (Elastic Container Registry)","Amazon ECS","AWS CodeArtifact","Amazon S3 Glacier"],
-      a:[0], e:"ECR is a managed Docker/OCI container image registry, integrated with ECS/EKS and IAM. ECS runs the containers; CodeArtifact is for software packages (npm, pip, Maven), not container images.", svc:"Amazon ECR" },
-
-    { d:"d3", q:"What is the correct high-level order of stages in a typical CodePipeline continuous-delivery pipeline?",
-      o:["Source → Build → Deploy","Build → Source → Deploy","Deploy → Build → Source","Source → Deploy → Build"],
-      a:[0], e:"A pipeline pulls from Source (e.g., CodeCommit/GitHub/S3), compiles and tests in Build (CodeBuild), then releases in Deploy (CodeDeploy/CloudFormation/ECS). Stages can add manual approvals and test actions.", svc:"CodePipeline stages" },
-
-    { d:"d3", q:"You want CodeDeploy to automatically roll back a deployment if a CloudWatch alarm fires (for example, elevated error rate) during traffic shifting. How is this achieved?",
-      o:["Associate a CloudWatch alarm with the deployment group and enable automatic rollback","Manually watch the console during every deploy","Use a stack policy","Set the Lambda timeout higher"],
-      a:[0], e:"CodeDeploy deployment groups support automatic rollback triggered by CloudWatch alarms or on deployment failure, reverting to the last known-good version — a core safety mechanism for canary/linear deploys.", svc:"CodeDeploy automatic rollback" },
-
-    { d:"d3", q:"In Elastic Beanstalk, how do you customize the environment (install packages, set options, run commands) declaratively as part of your source bundle?",
-      o:["Add .ebextensions/*.config files to the application source bundle","Edit /etc/ on each instance by hand","Use a buildspec.yml","Use an appspec.yml"],
-      a:[0], e:"Elastic Beanstalk reads YAML/JSON config files under the .ebextensions directory in your source bundle to install packages, set option settings, define environment variables, and run container commands.", svc:"Elastic Beanstalk .ebextensions" },
-
-    { d:"d3", q:"Using SAM, which property on a serverless function enables gradual traffic shifting (canary/linear) with automatic alias and rollback alarms during deployment?",
-      o:["AutoPublishAlias combined with DeploymentPreference","ReservedConcurrentExecutions","MemorySize","Runtime"],
-      a:[0], e:"In SAM, AutoPublishAlias creates/updates an alias on each deploy, and DeploymentPreference (Type: Canary/Linear, Alarms, Hooks) integrates with CodeDeploy to shift traffic gradually and roll back on alarm.", svc:"SAM safe deployments" },
-
-    { d:"d3", q:"You want to reuse one CloudFormation template across environments, passing in the instance size and environment name at deploy time. Which template feature do you use?",
-      o:["Parameters","Outputs","Metadata","Conditions only"],
-      a:[0], e:"Parameters let you pass values into a template at stack creation/update (with types, defaults, and allowed values), making templates reusable across environments. Outputs return values; Conditions control whether resources are created.", svc:"CloudFormation Parameters" },
-
-    { d:"d3", q:"Your CloudFormation templates are becoming huge and you want to reuse a common VPC definition as a component across multiple stacks. What is the recommended approach?",
-      o:["Use nested stacks that reference reusable child templates","Copy the same resources into every template","Use a single monolithic template","Use stage variables"],
-      a:[0], e:"Nested stacks let you factor common patterns (e.g., a VPC or security-group setup) into child templates referenced via AWS::CloudFormation::Stack, promoting reuse and keeping parent templates manageable.", svc:"CloudFormation nested stacks" },
-
-    { d:"d3", q:"You run a service on Amazon ECS and want zero-downtime releases with the ability to instantly roll back by shifting traffic between old and new task sets. Which deployment approach do you configure?",
-      o:["Blue/green deployment with CodeDeploy for ECS","In-place all-at-once replacement","Manual task stop/start","A rolling restart of EC2 instances"],
-      a:[0], e:"CodeDeploy blue/green for ECS provisions a new (green) task set alongside the current (blue) one and shifts traffic via the load balancer, enabling instant rollback and validation hooks. ECS also offers a native rolling update as an alternative.", svc:"ECS blue/green deployment" },
-
-    { d:"d3", q:"On Elastic Beanstalk you want a true blue/green release: deploy to a separate environment, test it, then cut over production DNS with an easy rollback. How is this done?",
-      o:["Deploy to a new environment and swap environment CNAMEs","Use an all-at-once in-place deploy","Edit instances manually","Use a rolling deployment policy"],
-      a:[0], e:"Beanstalk blue/green is achieved by deploying the new version to a separate environment and using Swap Environment URLs (CNAME swap). Traffic moves to the new environment, and rolling back is just another swap.", svc:"Elastic Beanstalk blue/green (CNAME swap)" },
-
-    { d:"d3", q:"Your team wants to define AWS infrastructure using a general-purpose programming language (TypeScript/Python) that synthesizes to CloudFormation. Which tool is this?",
-      o:["AWS Cloud Development Kit (CDK)","AWS SAM CLI","Elastic Beanstalk","CodePipeline"],
-      a:[0], e:"The AWS CDK lets you define infrastructure in familiar languages (TypeScript, Python, Java, C#, Go) using constructs; cdk synth produces a CloudFormation template that is then deployed. SAM is focused on serverless via a CloudFormation transform.", svc:"AWS CDK" },
-
-    { d:"d3", q:"You need a fully managed, private Git repository in AWS to host source code that integrates natively with CodePipeline. Which service provides this?",
-      o:["AWS CodeCommit","Amazon ECR","AWS CodeArtifact","Amazon S3"],
-      a:[0], e:"CodeCommit is a managed, private Git-based source-control service that integrates with CodePipeline and IAM. ECR stores container images and CodeArtifact stores software packages (npm, pip, Maven) — neither hosts Git source.", svc:"AWS CodeCommit" },
-
-    { d:"d3", q:"You must deploy the same CloudFormation stack consistently across multiple AWS accounts and regions from a single operation. Which feature do you use?",
-      o:["CloudFormation StackSets","A single stack with many parameters","Nested stacks only","Change sets"],
-      a:[0], e:"StackSets extend stacks so you can create, update, or delete a common stack across many accounts and regions in one operation — commonly used with AWS Organizations for governance and baseline provisioning.", svc:"CloudFormation StackSets" },
-
-    { d:"d3", q:"Using the SAM CLI, which command packages your code, uploads artifacts to S3, and deploys the transformed CloudFormation stack?",
-      o:["sam deploy (with sam build/package)","sam local invoke","sam init","sam logs"],
-      a:[0], e:"sam build compiles dependencies, sam package/deploy uploads the deployment artifacts to an S3 bucket (or ECR for images) and creates/updates the CloudFormation stack. sam local invoke runs functions locally; sam init scaffolds a project.", svc:"SAM build & deploy" },
-
-    { d:"d3", q:"In a CloudFormation template you need to build a string that embeds a parameter and a resource attribute, like 'https://${DomainName}/api'. Which intrinsic function is cleanest?",
-      o:["Fn::Sub","Fn::GetAZs","Fn::Select","Fn::Base64"],
-      a:[0], e:"Fn::Sub substitutes variables (parameters, pseudo-parameters, and resource references via ${Resource.Attr}) into a string, avoiding verbose Fn::Join constructs. It is the idiomatic way to compose strings in templates.", svc:"CloudFormation Fn::Sub" },
-
-    { d:"d3", q:"An Elastic Beanstalk environment must keep FULL capacity available during a deployment and roll instances in new batches without ever dropping below the desired count. Which policy fits?",
-      o:["Rolling with additional batch","All at once","Rolling (in place)","Immutable with reduced capacity"],
-      a:[0], e:"Rolling with an additional batch launches an extra batch of instances first so full capacity is maintained throughout the deployment, then removes the extra batch at the end. Plain rolling reduces capacity during the deploy.", svc:"Elastic Beanstalk rolling with additional batch" },
-
-    { d:"d3", q:"To run containers on ECS without managing EC2 servers, what defines the container image, CPU/memory, ports, and IAM role for your task?",
-      o:["An ECS task definition (run on Fargate)","A buildspec.yml","An .ebextensions config","A Lambda layer"],
-      a:[0], e:"An ECS task definition is the blueprint describing the container image(s), CPU/memory, port mappings, environment, and task/execution roles. Running it on the Fargate launch type means AWS manages the underlying compute — no EC2 to provision.", svc:"ECS task definition on Fargate" },
-
-    // ===== Domain 4: Troubleshooting & Optimization =====
-    { d:"d4", q:"A request passes through API Gateway, Lambda, and DynamoDB, and you need to visualize the end-to-end path and find which segment is slow. Which service and setup provides a service map and traces?",
-      o:["AWS X-Ray with active tracing enabled and the X-Ray SDK instrumenting calls","CloudWatch metrics only","CloudTrail event history","VPC Flow Logs"],
-      a:[0], e:"X-Ray traces requests across distributed services and renders a service map with latency per segment/subsegment, exposing bottlenecks. You enable active tracing (e.g., on Lambda/API Gateway) and instrument SDK calls.", svc:"AWS X-Ray" },
-
-    { d:"d4", q:"Your application receives ProvisionedThroughputExceededException and rate-exceeded errors during bursts. What client-side technique should you implement for the retries?",
-      o:["Exponential backoff with jitter","Immediate tight-loop retries","A fixed 1 ms retry interval","Stop retrying and fail the request permanently"],
-      a:[0], e:"Exponential backoff progressively increases the wait between retries, and adding jitter (randomness) prevents synchronized retry storms. AWS SDKs implement this by default for throttling/5xx errors.", svc:"Exponential backoff & jitter" },
-
-    { d:"d4", q:"A DynamoDB table with unpredictable, spiky traffic keeps throttling on provisioned capacity. Which change removes capacity planning and throttling due to under-provisioning?",
-      o:["Switch the table to on-demand capacity mode","Add more global secondary indexes","Reduce the item size only","Enable DynamoDB Streams"],
-      a:[0], e:"On-demand mode automatically scales to accommodate traffic without capacity planning, ideal for unpredictable/spiky workloads. Alternatively, provisioned mode with auto scaling can adjust capacity, but on-demand needs no tuning.", svc:"DynamoDB capacity modes" },
-
-    { d:"d4", q:"An API Gateway REST endpoint returns HTTP 429 to clients. What does this indicate?",
-      o:["Requests are being throttled (too many requests / rate or burst limit exceeded)","The Lambda integration returned malformed output","The integration timed out after 29 seconds","The client sent invalid JSON"],
-      a:[0], e:"429 Too Many Requests means throttling — the account/stage/usage-plan rate or burst limit was exceeded. 502 indicates a bad/ malformed integration response; 504 is an integration timeout (29s limit).", svc:"API Gateway error codes" },
-
-    { d:"d4", q:"An API Gateway endpoint backed by Lambda returns HTTP 504 during heavy load. What is the most likely cause?",
-      o:["The integration exceeded the API Gateway 29-second integration timeout","The client is unauthorized","CORS is misconfigured","The Lambda returned a malformed proxy response"],
-      a:[0], e:"504 Gateway Timeout occurs when the backend integration does not respond within API Gateway's maximum integration timeout (29 seconds). A malformed Lambda proxy response would instead surface as 502.", svc:"API Gateway 504 timeout" },
-
-    { d:"d4", q:"You want to search and analyze Lambda log data with an interactive query language (aggregations, filters) across log groups. Which tool do you use?",
-      o:["CloudWatch Logs Insights","CloudTrail Insights","Athena on VPC Flow Logs","X-Ray analytics only"],
-      a:[0], e:"CloudWatch Logs Insights provides a purpose-built query language to search and aggregate log data across log groups interactively — great for troubleshooting Lambda and application logs quickly.", svc:"CloudWatch Logs Insights" },
-
-    { d:"d4", q:"An asynchronously invoked Lambda function sometimes fails after its automatic retries. You must capture the failed event payloads for later inspection. What do you configure?",
-      o:["An on-failure destination (or a dead-letter queue) for the function","A larger function timeout","A CloudWatch dashboard","Provisioned concurrency"],
-      a:[0], e:"For async invocations, configure a Lambda destination (on-failure) to SQS/SNS/EventBridge, or a dead-letter queue, to capture events that fail after all retries so they are not lost and can be reprocessed.", svc:"Lambda DLQ / destinations" },
-
-    { d:"d4", q:"Your X-Ray tracing on a very high-traffic service is generating too many traces and cost. How do you reduce the volume while keeping representative data?",
-      o:["Adjust the X-Ray sampling rules to lower the sampling rate","Disable tracing entirely","Increase the trace retention period","Trace only errors by editing each log line"],
-      a:[0], e:"X-Ray sampling rules control what fraction of requests are traced (e.g., 1 request/second plus a percentage of the rest). Tuning sampling reduces cost and volume while retaining a statistically useful sample.", svc:"X-Ray sampling rules" },
-
-    { d:"d4", q:"A Lambda function is running slowly and appears CPU-bound. Which single configuration change increases the CPU (and network) allocated to it?",
-      o:["Increase the function's memory setting","Increase the function timeout","Increase reserved concurrency","Add more environment variables"],
-      a:[0], e:"In Lambda, CPU and network throughput scale proportionally with the memory setting. Raising memory gives the function more CPU, often reducing duration (and sometimes cost). Timeout only bounds max run time.", svc:"Lambda memory/CPU tuning" },
-
-    { d:"d4", q:"You want to publish an application-specific business metric (e.g., 'orders processed') and trigger an alarm when it drops. What do you use?",
-      o:["A CloudWatch custom metric plus a CloudWatch alarm","A CloudTrail trail","An X-Ray annotation","An SNS topic only"],
-      a:[0], e:"Applications publish custom metrics to CloudWatch (PutMetricData or the embedded metric format), then a CloudWatch alarm evaluates the metric against a threshold and can notify via SNS or trigger actions.", svc:"CloudWatch custom metrics & alarms" },
-
-    { d:"d4", q:"A browser app served from one domain calls an API Gateway endpoint on another domain and the browser blocks the response. What must you configure on the API?",
-      o:["Enable CORS (return the appropriate Access-Control-Allow-* headers)","Increase the Lambda timeout","Add a usage plan","Enable X-Ray tracing"],
-      a:[0], e:"Cross-Origin Resource Sharing must be enabled so the API returns Access-Control-Allow-Origin/Headers/Methods, including handling the OPTIONS preflight. Without CORS headers the browser blocks cross-origin responses.", svc:"API Gateway CORS" },
-
-    { d:"d4", q:"Which TWO approaches help a client gracefully handle DynamoDB read throttling during unexpected spikes? (Choose TWO)",
-      o:["Implement retries with exponential backoff","Enable DynamoDB auto scaling or switch to on-demand","Increase the item TTL","Disable the primary key","Add more attributes to each item"],
-      a:[0,1], multi:true, e:"On the client side, retry throttled requests with exponential backoff. On the table side, enable auto scaling (provisioned) or use on-demand capacity so throughput adapts to demand. TTL and schema changes do not address throttling.", svc:"DynamoDB throttling mitigation" },
-
-    { d:"d4", q:"To stream Lambda/application logs from a CloudWatch log group to another destination (e.g., an OpenSearch domain or Kinesis) in near real time, what do you create?",
-      o:["A CloudWatch Logs subscription filter","A metric filter","A CloudTrail trail","An S3 lifecycle rule"],
-      a:[0], e:"A subscription filter delivers matching log events in real time to Kinesis Data Streams, Firehose, or Lambda (and onward to OpenSearch). A metric filter, by contrast, only converts log patterns into CloudWatch metrics.", svc:"CloudWatch Logs subscription filters" },
-
-    { d:"d4", q:"You want a CloudWatch alarm to fire whenever the word 'ERROR' appears in an application's log group, without changing the application code. What do you create?",
-      o:["A CloudWatch Logs metric filter that increments a metric, then an alarm on it","A subscription filter to Lambda","An X-Ray sampling rule","A CloudTrail trail"],
-      a:[0], e:"A metric filter scans incoming log events for a pattern (e.g., 'ERROR') and publishes a CloudWatch metric (e.g., a count). You then set an alarm on that metric to notify or act — a common way to alert on log patterns.", svc:"CloudWatch Logs metric filters" },
-
-    { d:"d4", q:"A DynamoDB table is throttling even though total provisioned capacity looks sufficient. Investigation shows most traffic hits a few partition-key values. What is the root cause?",
-      o:["A hot partition caused by uneven partition-key distribution","The item size is too small","On-demand mode is disabled","Too many GSIs"],
-      a:[0], e:"DynamoDB spreads capacity across partitions by partition key. If requests concentrate on a few key values (a hot partition), those partitions throttle while others sit idle. The fix is a higher-cardinality/better-distributed partition key (e.g., write sharding).", svc:"DynamoDB hot partition" },
-
-    { d:"d4", q:"In X-Ray you want to filter and group traces by a business value such as customer tier. Which construct should you use so the value is indexed and searchable?",
-      o:["An annotation","Metadata","A subsegment name only","A sampling rule"],
-      a:[0], e:"X-Ray annotations are key-value pairs that are indexed and can be used in filter expressions to search/group traces. Metadata is recorded with the trace but is NOT indexed and cannot be used to filter.", svc:"X-Ray annotations vs metadata" },
-
-    { d:"d4", q:"An API Gateway endpoint using Lambda proxy integration returns HTTP 502 to clients. What is the most likely cause?",
-      o:["The Lambda function returned a malformed proxy response (wrong JSON shape)","The client was throttled","The integration timed out after 29 seconds","CORS headers are missing"],
-      a:[0], e:"With proxy integration, Lambda must return a specific JSON structure (statusCode, headers, body). A malformed or non-conforming response causes API Gateway to return 502 Bad Gateway. A 29s timeout is 504, and throttling is 429.", svc:"API Gateway 502 malformed response" },
-
-    { d:"d4", q:"Your CloudWatch Logs bill keeps growing because log groups are retained forever by default. What is the simplest fix to control cost?",
-      o:["Set a retention period on the log groups","Delete the Lambda functions","Disable all logging","Move logs to X-Ray"],
-      a:[0], e:"By default CloudWatch log groups never expire. Setting a retention policy (e.g., 30/90 days) automatically deletes older events, directly reducing storage cost while keeping recent logs for troubleshooting.", svc:"CloudWatch Logs retention" },
-
-    { d:"d4", q:"During a spike your Lambda function starts returning TooManyRequestsException (429) and invocations are being throttled. Which is a likely cause and fix?",
-      o:["Reserved concurrency is set too low (or account concurrency limit reached) — raise the limit / request an increase","The function timeout is too short — raise it","The memory is too high — lower it","CORS is misconfigured — enable it"],
-      a:[0], e:"Lambda throttles (429 / TooManyRequestsException) when concurrent executions hit the reserved concurrency for the function or the account concurrency limit. Increasing reserved concurrency or requesting a higher account limit resolves it.", svc:"Lambda throttling / concurrency limits" },
-
-    { d:"d4", q:"Your Lambda consumer of a Kinesis Data Stream is falling behind: the IteratorAge metric is climbing steadily. What does this indicate and what helps?",
-      o:["The consumer cannot keep up with incoming records; add shards / parallelism or speed up processing","The stream is out of storage; delete old records","The producer stopped; restart it","Encryption is slowing writes; disable it"],
-      a:[0], e:"A rising GetRecords.IteratorAgeMilliseconds means records are processed long after arrival — consumer lag. Remedies include increasing shard count and parallelization factor, optimizing the function, or increasing batch efficiency so processing keeps pace with ingestion.", svc:"Kinesis IteratorAge (consumer lag)" }
+    // ===== Domain 2: Security (26%) =====
+    { d:"d2", q:"An application on EC2 must retrieve a chat-service access token that is encrypted at rest and in transit and must ALSO be retrievable by applications in other AWS accounts. Which solution meets the requirements with the LEAST management overhead?",
+      o:["Store the token in AWS Secrets Manager encrypted with a customer managed KMS key, attach a resource-based policy to the secret allowing the other accounts, and grant the instance roles permission to read it","Encrypt the token with a KMS key and store the ciphertext in a DynamoDB table that the other accounts query","Store the token in an S3 object encrypted with an AWS managed key and add a bucket policy for the other accounts","Embed the token in each application's configuration and rotate it manually every month"],
+      a:[0], e:"Secrets Manager supports cross-account access via a resource policy on the secret — but only when the secret is encrypted with a customer managed key, because the AWS managed key cannot be used cross-account. The DynamoDB and S3 designs can work but leave retrieval, auditing, and rotation for you to build and operate.", svc:"Secrets Manager cross-account" },
+
+    { d:"d2", q:"An application calls a third-party HTTP API using an API key. The key must be manageable from code, and retrieving it must not degrade request performance. Which solution is MOST secure?",
+      o:["Store the key in AWS Secrets Manager, retrieve it with the SDK at startup, and cache it in memory between requests","Assign the key to a constant in the source code and keep the code in a private Git repository","Store the key as a private S3 object restricted with IAM policies and fetch it per request","Store the key in a DynamoDB table protected by a resource-based policy"],
+      a:[0], e:"Secrets Manager gives KMS encryption, IAM-scoped retrieval, CloudTrail auditing, and managed rotation; caching after the first read removes any performance concern. Code repositories, S3 objects, and DynamoDB rows all lack rotation and leak far more easily.", svc:"Secrets Manager for API keys" },
+
+    { d:"d2", q:"A containerized application on Amazon ECS needs environment-specific configuration — an external API URL, feature flags, and database credentials — for development, test, and production. Values must be centrally managed and picked up WITHOUT rebuilding the container image. Which approach is best?",
+      o:["Store configuration in SSM Parameter Store under hierarchical per-environment paths, keep credentials in Secrets Manager, and reference both from the task definition so they inject at container start","Bake a config file for each environment into a separate image tag","Declare all values as ENV instructions in the Dockerfile","Host a config file in a public S3 bucket that containers download at startup"],
+      a:[0], e:"ECS task definitions natively reference Parameter Store parameters and Secrets Manager secrets, injecting them as environment variables at start — central management, per-environment paths, encrypted credentials, and no rebuilds. Baking config into images couples every config change to a release.", svc:"ECS + Parameter Store/Secrets Manager" },
+
+    { d:"d2", q:"A web application must let users sign up and sign in with email and password, and after sign-in the app needs TEMPORARY AWS credentials so each user can read their own DynamoDB data directly. Which Cognito combination is required?",
+      o:["A user pool for authentication plus an identity pool that exchanges the user pool token for temporary AWS credentials","A user pool alone, because its JWTs already are AWS credentials","An identity pool alone, which provides sign-up and sign-in screens","An IAM user created programmatically for every application user"],
+      a:[0], e:"User pools are the identity provider (directory, sign-in, JWTs); identity pools exchange a valid token for temporary, scoped AWS credentials through STS. User pool JWTs cannot call AWS APIs by themselves, and per-user IAM users are an anti-pattern.", svc:"Cognito user vs identity pools" },
+
+    { d:"d2", q:"A consumer application must offer Sign in with Google and Sign in with Apple, while the backend keeps receiving one consistent set of JWTs regardless of how each user signed in. How should the developer configure this?",
+      o:["Add Google and Apple as federated identity providers on the Cognito user pool; after federation the pool issues its own tokens to the app","Embed each provider's SDK and send the provider-native tokens straight to the backend","Create an IAM role per social provider for clients to assume","Store social usernames and passwords in the application database"],
+      a:[0], e:"A user pool brokers external IdPs: users authenticate with Google or Apple, and Cognito issues its standard ID and access tokens, so the backend validates a single token format. Raw provider tokens would force the backend to integrate and trust every IdP separately.", svc:"Cognito social federation" },
+
+    { d:"d2", q:"An enterprise wants employees to access an internal web application using their existing corporate credentials through the company's SAML 2.0 identity provider, with no new passwords created. What should the developer configure?",
+      o:["Add the corporate IdP as a SAML identity provider on the Cognito user pool and map SAML assertion attributes to user pool attributes","Bulk-import all employees into the user pool with temporary passwords","Create IAM users for employees and distribute access keys","Enable unauthenticated guest identities on an identity pool"],
+      a:[0], e:"User pools federate with SAML 2.0 IdPs: employees authenticate against the corporate provider, Cognito issues application tokens, and attribute mapping carries identity details across. No new credentials are ever created.", svc:"Cognito SAML federation" },
+
+    { d:"d2", q:"An application uses Cognito user pools and identity pools. Users upload and download their own files (3 KB to 300 MB) in a shared S3 bucket. Which design ensures users can access ONLY their own objects, with the HIGHEST level of security?",
+      o:["On the identity pool's authenticated role, scope S3 actions to a per-user prefix using the ${cognito-identity.amazonaws.com:sub} policy variable","Record file ownership in DynamoDB and filter the file list shown in the UI by user ID","Proxy every upload and download through a Lambda function that checks ownership before acting","Use S3 event notifications to validate each upload and download request"],
+      a:[0], e:"The IAM policy variable confines each identity to its own key prefix, enforced by AWS authorization itself — nothing in application code to bypass. UI filtering is trivially circumvented with direct API calls, and proxying 300 MB files through Lambda hits payload limits while resting on custom checks.", svc:"Cognito + IAM policy variables" },
+
+    { d:"d2", q:"After a user signs in through a Cognito user pool, a single-page app calls a REST API protected by a Cognito authorizer that validates OAuth scopes. Which token must the app send in the Authorization header?",
+      o:["The access token","The ID token","The refresh token","The user's password encoded in Base64"],
+      a:[0], e:"The access token carries OAuth scopes and authorizes calls to resource servers — required whenever the authorizer checks scopes. The ID token holds identity claims about the user, and the refresh token exists only to obtain new tokens.", svc:"Cognito token usage" },
+
+    { d:"d2", q:"Members of the Admins group in a Cognito user pool must receive an IAM role with elevated S3 permissions when accessing AWS through the identity pool, while all other users receive a restricted role. How is this achieved?",
+      o:["Configure role mapping on the identity pool driven by the cognito:groups claim in the user's token","Create a separate identity pool for admins with no mapping configured","Grant the elevated permissions to the default authenticated role for everyone","Issue long-term IAM access keys to admin users only"],
+      a:[0], e:"Identity pools support token-based role mapping: user pool groups carry role ARNs and precedence, and the cognito:groups claim selects which role's credentials are vended. A single over-privileged shared role violates least privilege.", svc:"Cognito role mapping" },
+
+    { d:"d2", q:"A REST API must authorize requests carrying a proprietary bearer token that is validated against an external service, and validation results should be cached briefly to limit calls to that service. Which API Gateway feature implements this?",
+      o:["A Lambda authorizer with its authorizer result TTL configured","A Cognito user pool authorizer","IAM authorization with SigV4-signed requests","API keys attached to a usage plan"],
+      a:[0], e:"Lambda authorizers run custom validation logic and return an IAM policy that API Gateway caches for a configurable TTL, cutting repeated external validations. Cognito authorizers validate only Cognito tokens, and API keys identify callers but do not authenticate them.", svc:"API Gateway Lambda authorizer" },
+
+    { d:"d2", q:"An HTTP API in API Gateway must validate JWTs issued by a third-party OpenID Connect provider — the issuer URL and audience are known — WITHOUT running any custom authorizer code. What should the developer configure?",
+      o:["A JWT authorizer on the HTTP API configured with the issuer and audience","A Lambda authorizer that decodes and verifies the JWT manually","A Cognito identity pool in front of the API","Mutual TLS between clients and the API"],
+      a:[0], e:"HTTP APIs include native JWT authorizers: API Gateway fetches the issuer's signing keys and validates signature, expiry, issuer, and audience with no custom code. A Lambda authorizer can do it, but adds code and latency the built-in feature avoids.", svc:"HTTP API JWT authorizer" },
+
+    { d:"d2", q:"A developer must encrypt 500 MB data files with a KMS customer managed key before storing them in S3, but the KMS Encrypt API accepts at most 4 KB of data. What is the correct approach?",
+      o:["Call GenerateDataKey, encrypt the file locally with the returned plaintext data key, store the encrypted copy of the data key with the ciphertext, and discard the plaintext key","Split each file into 4 KB chunks and call Encrypt on every chunk","Export the KMS key material and run the encryption offline","Request a KMS payload limit increase from AWS Support"],
+      a:[0], e:"This is envelope encryption: KMS protects only the data key while bulk data is encrypted locally; decryption calls KMS Decrypt on the stored encrypted data key. Chunked Encrypt calls are slow and costly, and symmetric KMS key material can never be exported.", svc:"KMS envelope encryption" },
+
+    { d:"d2", q:"Compliance requires the customer managed KMS key protecting an application's data to have its key material rotated yearly, WITHOUT changing the key ARN or re-encrypting existing data. What should the developer do?",
+      o:["Enable automatic key rotation on the customer managed key","Create a brand-new key each year and update every reference to it","Re-encrypt all stored data annually under a fresh data key","Switch to an AWS managed key, which the customer rotates on demand"],
+      a:[0], e:"Automatic rotation generates new backing material every year while the key ID and ARN stay constant; KMS keeps prior material to decrypt older ciphertext, so nothing is re-encrypted. AWS managed keys rotate on AWS's schedule and give the customer no control.", svc:"KMS automatic rotation" },
+
+    { d:"d2", q:"Account B must decrypt data that was encrypted with a customer managed KMS key owned by Account A. Which configuration enables this?",
+      o:["The key policy in Account A must allow Account B, AND the calling principal in Account B needs an IAM policy granting kms:Decrypt on that key's ARN","Only an IAM policy in Account B is needed; key policies play no role","Mark the KMS key as public in Account A","Send Account B an exported copy of the key material"],
+      a:[0], e:"Cross-account KMS access requires both sides: the key policy in the owning account must allow the external account, and the caller's IAM policy must grant the action on the key. IAM permissions alone can never reach into another account's key, and symmetric key material cannot be exported.", svc:"KMS cross-account access" },
+
+    { d:"d2", q:"An application must encrypt a 1 KB configuration string and decrypt it later, with the key fully managed in KMS and every single use logged in CloudTrail. What is the SIMPLEST correct approach?",
+      o:["Call the KMS Encrypt and Decrypt APIs directly with a customer managed key, since the payload is under 4 KB","Generate a data key and implement full envelope encryption","Store the string as an S3 object with SSE-S3","Base64-encode the string before saving it"],
+      a:[0], e:"Payloads up to 4 KB can be encrypted by KMS directly — the simplest path, with every operation appearing in CloudTrail. Envelope encryption is for larger data, and Base64 is an encoding, not encryption.", svc:"KMS direct encryption (<=4 KB)" },
+
+    { d:"d2", q:"A security team requires that use of the key encrypting an S3 bucket's objects be auditable per request in CloudTrail, and that the team can disable the key to instantly revoke all decryption. Which S3 encryption mode meets these requirements?",
+      o:["SSE-KMS with a customer managed key","SSE-S3","SSE-C with keys supplied on each request","Client-side Base64 obfuscation of object contents"],
+      a:[0], e:"SSE-KMS with a customer managed key logs every key use in CloudTrail, and disabling the key or tightening its policy immediately blocks decryption. SSE-S3 keys are invisible to the customer with no per-request audit, and SSE-C makes you transmit and manage raw keys yourself.", svc:"S3 SSE-KMS" },
+
+    { d:"d2", q:"After an incident in which a developer accidentally attached a public-read policy to a production bucket, the company wants a control that PREVENTS any S3 bucket in the account from ever being made public, regardless of future policies or ACLs. What should be enabled?",
+      o:["S3 Block Public Access at the account level","Default encryption on every bucket","S3 Versioning on every bucket","MFA Delete on every bucket"],
+      a:[0], e:"Account-level Block Public Access overrides any bucket policy or ACL that would grant public access — a preventive guardrail rather than a cleanup. Encryption, versioning, and MFA Delete protect data integrity but do nothing about public exposure.", svc:"S3 Block Public Access" },
+
+    { d:"d2", q:"A support engineer must share one confidential report from a private S3 bucket with an external auditor for 24 hours. The auditor has no AWS account, and bucket permissions must not change. What should the engineer send?",
+      o:["A presigned URL for the object generated with a 24-hour expiry","The bucket ARN together with a cross-account role to assume","A temporarily public object ACL, to be removed the next day","An IAM access key pair scoped to the single object"],
+      a:[0], e:"A presigned URL embeds the signer's credentials and an expiry; anyone holding the link can fetch the object until it lapses — no permission changes and no AWS account needed. Note the URL also dies when the signing credentials expire, so sign with sufficiently long-lived credentials.", svc:"S3 presigned URLs" },
+
+    { d:"d2", q:"A streaming site serves thousands of private video segment files per viewing session through CloudFront and must restrict playback to paying subscribers without minting a separate URL for every segment. Which mechanism fits, and how is the origin secured?",
+      o:["CloudFront signed cookies for subscriber access, with origin access control (OAC) so the S3 origin only accepts requests from CloudFront","A CloudFront signed URL generated for each individual video segment","A public S3 bucket relying on unguessable object key names","S3 Transfer Acceleration combined with presigned URLs"],
+      a:[0], e:"Signed cookies authorize access to many files with one grant — built for HLS/DASH segment streams — while OAC blocks direct S3 access so every request flows through CloudFront's controls. Per-segment signed URLs are impractical at thousands of files per session.", svc:"CloudFront signed cookies + OAC" },
+
+    { d:"d2", q:"An application in Account A must read a DynamoDB table in Account B several times a day. Security mandates temporary credentials and forbids shared long-term keys. What is the correct setup?",
+      o:["Create a role in Account B trusting Account A; the application calls STS AssumeRole and reads the table with the temporary credentials returned","Create an IAM user in Account B and store its access keys in Account A's application config","Attach Account A's root user to the table's resource policy","Replicate the table into Account A on a schedule"],
+      a:[0], e:"Cross-account access is done by assuming a role: the owning account defines the role and trust policy, and the caller receives short-lived STS credentials scoped to the role's permissions. Shared IAM user keys directly violate the temporary-credentials mandate.", svc:"STS AssumeRole" },
+
+    { d:"d2", q:"A monitoring SaaS vendor assumes an IAM role in each customer's AWS account. A customer wants assurance that the vendor's platform cannot be tricked by ANOTHER customer into assuming this customer's role — the confused deputy problem. What must be added?",
+      o:["A unique ExternalId condition in the role's trust policy that the vendor must present on every AssumeRole call","Mandatory MFA on the vendor's root account","A permissions boundary attached to the vendor-facing role","A service control policy denying sts:AssumeRole broadly"],
+      a:[0], e:"The ExternalId is a per-customer shared secret checked by the trust policy — the canonical confused-deputy mitigation for third-party role assumption. Boundaries and SCPs shape permissions but cannot bind an assumption to the correct customer context.", svc:"External ID (confused deputy)" },
+
+    { d:"d2", q:"A compliance rule states that objects in an S3 bucket may only ever be accessed over encrypted connections. How does a developer enforce this at the bucket itself?",
+      o:["Add a bucket policy statement that denies all S3 actions when the condition aws:SecureTransport is false","Enable SSE-KMS default encryption on the bucket","Enable S3 Versioning with MFA Delete","Attach the bucket to a VPC gateway endpoint"],
+      a:[0], e:"A Deny with aws:SecureTransport false rejects any request arriving over plain HTTP, enforcing TLS for the bucket regardless of caller. Default encryption protects data at rest — a different control entirely.", svc:"Enforcing TLS with bucket policy" },
+
+    { d:"d2", q:"A developer's role has a policy allowing s3:GetObject on a bucket, yet requests fail with AccessDenied. A group policy that also applies to the developer contains an explicit Deny for s3:* on that bucket. What is the outcome and why?",
+      o:["Access is denied, because an explicit Deny in any applicable policy overrides every Allow","Access is allowed, because the Allow is more specific than the Deny","The result depends on which policy was attached most recently","Access is granted for reads but denied for writes"],
+      a:[0], e:"IAM evaluates all applicable policies together, and an explicit Deny always defeats any Allow — specificity and attachment order are irrelevant. The only fix is removing or narrowing the Deny.", svc:"IAM policy evaluation" },
+
+    { d:"d2", q:"Platform engineering lets application teams create their own IAM roles for workloads but must guarantee those roles can NEVER exceed a defined maximum set of permissions — even if a team attaches AdministratorAccess. Which IAM feature enforces this ceiling?",
+      o:["Permissions boundaries required on every role the teams create","Resource-based policies on each service the teams use","Inline session policies passed at AssumeRole time","IAM Access Analyzer monitoring"],
+      a:[0], e:"A permissions boundary caps effective permissions at the intersection of the boundary and the identity policies, so attaching broader policies grants nothing beyond the boundary. Access Analyzer only reports findings — it enforces nothing.", svc:"IAM permissions boundaries" },
+
+    { d:"d2", q:"A security audit finds long-term IAM access keys stored in configuration files on an EC2 instance that calls S3 and DynamoDB. What is the recommended remediation?",
+      o:["Delete the keys and attach an IAM role to the instance through an instance profile so the SDK picks up temporary credentials automatically","Move the keys into an encrypted file on the same instance","Rotate the keys weekly with a scheduled script","Pass the keys through EC2 user data at boot"],
+      a:[0], e:"Instance roles supply auto-rotated temporary credentials through the instance metadata service, which the SDKs use automatically — no stored secrets anywhere. Encrypting or rotating stored keys still leaves long-term credentials on the host to leak.", svc:"IAM roles for EC2" },
+
+    { d:"d2", q:"A Lambda function must only put items into a single DynamoDB table named Orders. Which execution role policy follows least privilege?",
+      o:["Allow dynamodb:PutItem on the specific Orders table ARN","Allow dynamodb:* on all resources in the account","Allow dynamodb:PutItem on * so future tables keep working","Attach AdministratorAccess to avoid permission debugging"],
+      a:[0], e:"Least privilege is the one required action on the one required resource. Wildcarding actions or resources expands the blast radius of a compromised function and fails security review.", svc:"Least-privilege execution roles" },
+
+    { d:"d2", q:"An application on EC2 must connect to Amazon RDS for MySQL WITHOUT storing any database password, authenticating with the instance's IAM role instead. Which feature enables this?",
+      o:["IAM database authentication, generating a short-lived authentication token with the SDK for each connection","Placing the database password in EC2 user data","Tunneling connections through a bastion host over SSH","Reading the password from a plaintext .env file at startup"],
+      a:[0], e:"With IAM database authentication enabled, the application calls generate-db-auth-token using its role credentials and presents the 15-minute token as the password over TLS — no stored secrets at all. It suits moderate connection rates; heavy connection churn still favors Secrets Manager rotation.", svc:"RDS IAM authentication" },
+
+    { d:"d2", q:"A CodeBuild project must authenticate to Docker Hub during builds, and a hard-coded password in the buildspec was flagged by security. What is the recommended way to supply the credential?",
+      o:["Reference it from the buildspec env block using the secrets-manager (or parameter-store SecureString) mapping so it is injected at build time","Commit an .env file containing the password alongside the buildspec","Echo the password into the build from a pipeline environment variable defined in plaintext","Bake the credential into a custom build image"],
+      a:[0], e:"Buildspec env supports secrets-manager and parameter-store mappings that resolve values at build time; the secret stays out of source control and is masked in logs. Every alternative persists the credential in plaintext somewhere reviewable.", svc:"CodeBuild secrets injection" },
+
+    { d:"d2", q:"A Lambda function's environment variables hold a third-party API secret. Security requires the values to be encrypted at rest with a customer managed KMS key so that only principals with kms:Decrypt on that key can view them, with usage logged. What should be configured?",
+      o:["Set the function to encrypt its environment variables at rest with the customer managed key","Nothing — environment variables are never visible to anyone in the console","Move the secret into the function's code package instead","Base64-encode the values before setting them as variables"],
+      a:[0], e:"Lambda encrypts environment variables with KMS; choosing a customer managed key ties console/API visibility to kms:Decrypt on that key and records every use in CloudTrail. With the default service key, anyone who can view the function configuration can read the values.", svc:"Lambda env var encryption" },
+
+    // ===== Domain 3: Deployment (24%) =====
+    { d:"d3", q:"A developer wants to unit-test a Lambda function locally against a realistic S3 ObjectCreated event before deploying anything, using the AWS SAM CLI. Which command sequence is correct?",
+      o:["sam build, then sam local generate-event s3 put > event.json, then sam local invoke MyFunction -e event.json","sam deploy --guided, then aws lambda invoke against the deployed function","sam init, then sam publish to the Serverless Application Repository","sam validate, then sam logs --tail"],
+      a:[0], e:"sam build resolves dependencies, generate-event fabricates a realistic sample payload, and sam local invoke runs the function in a Lambda-like Docker container with that event — all before any deployment. The other sequences either deploy first or never execute the function.", svc:"SAM CLI local testing" },
+
+    { d:"d3", q:"A team develops a serverless REST API defined in a SAM template and wants to iterate on handler code while calling the endpoints from a browser against localhost. Which SAM CLI command provides this?",
+      o:["sam local start-api","sam package","sam validate","sam pipeline init"],
+      a:[0], e:"sam local start-api runs a local HTTP server that emulates API Gateway routes mapped to the template's functions in Docker, so the API is callable at a localhost URL. package uploads artifacts and validate only lints the template.", svc:"sam local start-api" },
+
+    { d:"d3", q:"On the first deployment of a SAM application, a developer wants the CLI to prompt for the stack name, region, and artifact bucket, then persist those answers so later deployments run non-interactively. Which command does this, and where are the settings saved?",
+      o:["sam deploy --guided, which saves the choices to samconfig.toml","sam build, which writes them into .aws-sam/build.toml","aws cloudformation deploy, which stores them in ~/.aws/config","sam init, which records them in template.yaml"],
+      a:[0], e:"sam deploy --guided interactively collects deployment settings and writes samconfig.toml; subsequent deploys are simply sam deploy. sam init scaffolds a new project and deploys nothing.", svc:"sam deploy --guided / samconfig.toml" },
+
+    { d:"d3", q:"During active development, a developer wants code changes to a SAM-defined Lambda function to reach the AWS development stack within seconds of saving, without waiting for a full CloudFormation deployment on every change. Which capability provides this?",
+      o:["sam sync --watch (AWS SAM Accelerate), which pushes supported code changes directly to the development stack","Running sam deploy inside a shell while-loop","CloudFormation drift detection with auto-remediation","A CodePipeline configured with one-minute polling"],
+      a:[0], e:"sam sync --watch observes the project and syncs code-level changes straight to the cloud resources, bypassing full CloudFormation updates for supported changes — near-instant iteration intended for development environments, not production.", svc:"SAM Accelerate (sam sync)" },
+
+    { d:"d3", q:"A YAML template defines AWS::Serverless::Function resources, but deployment fails with an error about unrecognized resource types. What is missing from the template?",
+      o:["The Transform: AWS::Serverless-2016-10-31 declaration that expands SAM resources into standard CloudFormation","A Mappings section defining the function runtimes","The AWSTemplateFormatVersion header","An Outputs section exporting the function ARNs"],
+      a:[0], e:"SAM is implemented as a CloudFormation macro: the Transform line tells CloudFormation to expand AWS::Serverless::* types into full resources at deploy time. Without it, the serverless types are unknown to the service.", svc:"SAM Transform" },
+
+    { d:"d3", q:"In a SAM template, a function needs create, read, update, and delete access to one DynamoDB table with as little hand-written IAM as possible. What is the recommended approach?",
+      o:["Attach the DynamoDBCrudPolicy SAM policy template to the function, parameterized with the table name","Attach the AdministratorAccess managed policy to the execution role","Write a full custom IAM policy document inline for every action","Grant dynamodb:* on all resources in the execution role"],
+      a:[0], e:"SAM policy templates are pre-scoped least-privilege snippets — DynamoDBCrudPolicy expands to exactly the CRUD actions on the referenced table. They avoid both over-permissioning and pages of hand-written IAM.", svc:"SAM policy templates" },
+
+    { d:"d3", q:"A team deploying a Lambda function with SAM requires each release to shift 10% of traffic to the new version first, shift the remainder after five minutes, and roll back automatically if a CloudWatch alarm fires during the window. Which template configuration achieves this?",
+      o:["AutoPublishAlias on the function plus a DeploymentPreference of type Canary10Percent5Minutes with the alarm listed under Alarms","Timeout and MemorySize raised for the deployment window","ReservedConcurrentExecutions set to 10 percent of expected load","An EventBridge rule that watches CloudFormation deployment events"],
+      a:[0], e:"AutoPublishAlias publishes a new version and repoints an alias on each deploy, and DeploymentPreference wires in CodeDeploy to shift traffic canary-style and roll back automatically on the referenced alarms. Concurrency and timeout settings have nothing to do with traffic shifting.", svc:"SAM DeploymentPreference" },
+
+    { d:"d3", q:"Before CodeDeploy shifts ANY production traffic to a new Lambda version, the team must run integration checks against that new version and abort the deployment if they fail. Which mechanism runs the checks?",
+      o:["A PreTraffic (BeforeAllowTraffic) hook Lambda function declared in the deployment configuration","A CloudWatch dashboard that an engineer reviews during the deploy","An SQS queue placed between the two function versions","A cron job on a build server that tests after the shift completes"],
+      a:[0], e:"Lambda deployments in CodeDeploy support BeforeAllowTraffic and AfterAllowTraffic hooks; the hook function must report success through PutLifecycleEventHookExecutionStatus or the deployment stops and rolls back — the built-in gate for pre-traffic validation.", svc:"CodeDeploy traffic hooks" },
+
+    { d:"d3", q:"A CloudFormation template deploys EC2 instances across many accounts, and the instance type must be restricted to a company-approved list that operators choose from at stack-creation time. How should the template implement this?",
+      o:["Define an InstanceType parameter with the approved list set as AllowedValues","Maintain one template per approved instance type","Hard-code the smallest approved type for everyone","Define every type as a separate resource and delete the unused ones afterward"],
+      a:[0], e:"A parameter with AllowedValues both prompts the operator and validates the selection at create/update time, keeping a single reusable template. Per-type templates and post-creation cleanup multiply maintenance and cost.", svc:"CloudFormation AllowedValues" },
+
+    { d:"d3", q:"A single CloudFormation template must launch an EC2 instance from a different region-specific AMI ID depending on the region where the stack is created, with no user input. Which template feature selects the correct AMI?",
+      o:["A Mappings section keyed by region, read with Fn::FindInMap using the AWS::Region pseudo parameter","A required parameter where the operator types the AMI ID","A Conditions section testing an Environment parameter","An exported Output from another stack"],
+      a:[0], e:"Mappings are static lookup tables; Fn::FindInMap combined with AWS::Region resolves the right AMI automatically wherever the stack runs. (An SSM public parameter for the latest AMI is another modern option, but Mappings is the feature designed for this among the choices.)", svc:"CloudFormation Mappings" },
+
+    { d:"d3", q:"Before applying an update to a production CloudFormation stack, a release manager must confirm whether any resource will be REPLACED — deleted and recreated — by the change. What should they generate?",
+      o:["A change set, reviewing the planned actions and replacement flags before executing","A stack policy protecting the production resources","A drift detection report on the stack","A copy of the stack in a sandbox account"],
+      a:[0], e:"Change sets preview every add, modify, and delete — including whether a modify requires replacement — before anything executes. Drift detection compares deployed state to the template; it does not preview a pending update.", svc:"CloudFormation change sets" },
+
+    { d:"d3", q:"A network stack creates a VPC and subnets that several application stacks in the same account and region must reference. Which native CloudFormation mechanism shares the IDs, and what constraint does it impose?",
+      o:["Export the values as Outputs and consume them with Fn::ImportValue; an exported value cannot change or be deleted while any stack imports it","Hard-code the IDs into each application template after the first deploy","Use DependsOn attributes across the stacks","Look the IDs up at runtime with a custom resource in every consumer"],
+      a:[0], e:"Cross-stack references (Export plus Fn::ImportValue) are the built-in sharing mechanism, and the lock on in-use exports protects consumers from breaking changes. DependsOn only orders resources within a single stack.", svc:"Cross-stack exports" },
+
+    { d:"d3", q:"A CloudFormation stack includes an RDS database. If the stack is ever deleted, the team requires a final snapshot to be preserved rather than losing the data. Which resource attribute accomplishes this?",
+      o:["DeletionPolicy: Snapshot on the RDS resource","DeletionPolicy: Delete on the RDS resource","An UpdatePolicy on the database resource","A stack policy that denies delete actions"],
+      a:[0], e:"DeletionPolicy: Snapshot captures a final snapshot when the resource is removed or the stack deleted (supported for RDS, EBS volumes, ElastiCache, and others). Retain would keep the live database running; the default Delete destroys it.", svc:"DeletionPolicy Snapshot" },
+
+    { d:"d3", q:"A platform team must roll out an identical IAM-and-CloudTrail baseline stack to 40 AWS accounts across three regions from one central operation, including automatic deployment into accounts that join the organization later. Which capability is designed for this?",
+      o:["CloudFormation StackSets with service-managed permissions and automatic deployments enabled","A shell script looping create-stack across 120 account-region credential pairs","Nested stacks referenced from each account's template","Change sets executed manually in every account"],
+      a:[0], e:"StackSets deploy one template across accounts and regions from a single operation; with service-managed (Organizations) permissions, automatic deployments cover accounts added later. Scripts and manual executions track neither drift nor new accounts.", svc:"CloudFormation StackSets" },
+
+    { d:"d3", q:"A CloudFormation template defines a Lambda function whose Code property points to an S3 bucket and key. A developer uploads new code to the SAME key and updates the stack, but CloudFormation reports no changes and the old code keeps running. Why, and what fixes it?",
+      o:["The template itself did not change, so CloudFormation detects nothing to update; reference a new object key per build or an S3ObjectVersion that changes on each upload","S3 replication lag is delaying the new code; retry the update later","The function requires reserved concurrency before accepting new code","Lambda functions can only be updated by deleting and recreating the stack"],
+      a:[0], e:"CloudFormation diffs templates, not S3 object contents — identical bucket and key means no detected change. Versioned buckets with S3ObjectVersion, content-hashed keys per build, or SAM/CloudFormation package (which rewrites keys automatically) force the update through.", svc:"Updating Lambda code via CloudFormation" },
+
+    { d:"d3", q:"A team of TypeScript developers wants to define AWS infrastructure in TypeScript using constructs, write unit tests for it, and preview exactly what a release would change in the deployed environment. Which tool and command support the preview?",
+      o:["The AWS CDK, using cdk diff to compare the synthesized template against the deployed stack","The AWS SAM CLI, using sam validate","The CloudFormation console template designer","The Elastic Beanstalk CLI, using eb status"],
+      a:[0], e:"The CDK defines infrastructure in general-purpose languages and synthesizes CloudFormation; cdk diff shows precisely what a deploy would add, change, or destroy. SAM templates are YAML/JSON, and sam validate only checks syntax.", svc:"AWS CDK / cdk diff" },
+
+    { d:"d3", q:"A CodePipeline release process must pause after the staging deployment so a QA lead explicitly signs off before the production stage runs, with a notification sent when the gate is reached. Which pipeline configuration implements this?",
+      o:["A manual approval action between the staging and production stages, publishing to an SNS topic","A longer polling interval configured on the source stage","A CloudWatch alarm attached to the pipeline's execution metric","Two disconnected pipelines that an engineer runs in sequence"],
+      a:[0], e:"A manual approval action halts execution until an authorized user approves or rejects (with SNS notification and a seven-day expiry). Nothing else in CodePipeline pauses for human sign-off.", svc:"CodePipeline manual approval" },
+
+    { d:"d3", q:"A build must install dependencies, run unit tests that fail the build on error, package the application, and publish the artifact — all in CodeBuild. Where are these steps defined?",
+      o:["In buildspec.yml phases (install, pre_build, build, post_build), with outputs declared in the artifacts section","In appspec.yml lifecycle hook scripts","As inline shell commands typed into the CodePipeline console","In the Dockerfile ENTRYPOINT of the build image"],
+      a:[0], e:"buildspec.yml drives CodeBuild: commands run per phase, any non-zero exit fails the build, and the artifacts section defines what is uploaded. appspec.yml belongs to CodeDeploy and controls deployment, not builds.", svc:"CodeBuild buildspec" },
+
+    { d:"d3", q:"An ECS service deploys with CodeDeploy blue/green. Which file tells CodeDeploy the new task definition plus the container name and port to register with the load balancer's target groups during the traffic shift?",
+      o:["The AppSpec file for ECS deployments","buildspec.yml in the source repository","The service's Dockerfile","samconfig.toml from the build stage"],
+      a:[0], e:"For ECS blue/green, the AppSpec file names the task definition, container, and port that CodeDeploy wires into the target groups as it shifts listener traffic between the blue and green task sets, plus optional lifecycle hooks for validation.", svc:"CodeDeploy ECS AppSpec" },
+
+    { d:"d3", q:"An ECS Fargate task fails at startup because it cannot pull its image from Amazon ECR or write logs to CloudWatch. Once running, the application code must also read from an S3 bucket. Which IAM configuration is correct?",
+      o:["Grant ECR pull and CloudWatch Logs permissions to the task EXECUTION role, and S3 read permissions to the task role","Grant all of the permissions to the task role only","Grant all of the permissions to the container instance profile","Grant S3 permissions to the execution role and the ECR permissions to the task role"],
+      a:[0], e:"The execution role is used by the ECS agent to pull images, fetch secrets, and ship logs; the task role is what the running application assumes for its own AWS calls. Startup failures around ECR and logs point at the execution role, while app-level S3 access belongs on the task role.", svc:"ECS task role vs execution role" },
+
+    { d:"d3", q:"A developer must push a locally built Docker image to a private Amazon ECR repository. Which sequence is correct?",
+      o:["Pipe aws ecr get-login-password into docker login for the registry, docker tag the image with the full repository URI, then docker push","Run docker push directly, because private ECR repositories require no authentication","Upload the image as a tarball to S3 and trigger an ECR import job","Run git push against the repository URI"],
+      a:[0], e:"ECR uses token authentication: get-login-password feeds a 12-hour token to docker login, and the image must be tagged with the full registry/repository URI before pushing. The caller also needs ecr:GetAuthorizationToken plus push permissions on the repository.", svc:"Pushing images to ECR" },
+
+    { d:"d3", q:"A company already runs Kubernetes on premises with extensive Helm charts and kubectl tooling. They want to move to AWS, REUSING those manifests and skills, without operating the Kubernetes control plane themselves. Which compute service fits?",
+      o:["Amazon EKS","Amazon ECS on Fargate","AWS Elastic Beanstalk","AWS Lambda with container images"],
+      a:[0], e:"EKS is managed upstream Kubernetes — existing manifests, Helm charts, and kubectl workflows transfer directly while AWS operates the control plane. ECS uses AWS-proprietary orchestration, which would force a rewrite of all deployment tooling.", svc:"Amazon EKS" },
+
+    { d:"d3", q:"An Elastic Beanstalk production environment must deploy new versions with NO reduction in capacity and NO downtime, and a failed deployment must be discarded without ever touching the instances serving traffic. Deployment cost is a secondary concern. Which deployment policy is best?",
+      o:["Immutable","All at once","Rolling","Rolling with additional batch"],
+      a:[0], e:"Immutable deployments launch a parallel fleet of new instances and swap in only after health checks pass; a failure simply terminates the new fleet, leaving production untouched. Rolling variants update instances in place, so a bad version reaches live capacity.", svc:"Beanstalk immutable deployments" },
+
+    { d:"d3", q:"On Elastic Beanstalk, a team wants a canary-style release in which 10% of LIVE user traffic is routed to the new application version running on fresh instances, proceeding to full rollout only if the new version stays healthy for an evaluation period. Which deployment policy does this?",
+      o:["Traffic splitting","Immutable","All at once","Rolling"],
+      a:[0], e:"Traffic-splitting deployments launch the new version on new instances and shift a configurable percentage of load-balancer traffic to them for an evaluation window — Beanstalk's canary. Immutable swaps all traffic at once after health checks, with no percentage phase.", svc:"Beanstalk traffic splitting" },
+
+    { d:"d3", q:"A REST API stage in API Gateway must send 5% of production requests to a NEW deployment for validation, with easy promotion or rollback, WITHOUT creating a second stage or changing any client URLs. Which feature is this?",
+      o:["Canary release settings on the stage","Stage variables referencing the new deployment","A usage plan splitting traffic between keys","Migrating the endpoint type to edge-optimized"],
+      a:[0], e:"Stage canary settings route a percentage of traffic to a new deployment on the same stage and URL; promoting applies the canary deployment to the stage, and deleting it rolls back. Clients never see a different endpoint.", svc:"API Gateway canary release" },
+
+    { d:"d3", q:"A front-end team wants push-to-deploy from Git for a React single-page application, with automatic builds, hosting on a global CDN, and preview deployments created for every pull request — all fully managed. Which AWS service should they use?",
+      o:["AWS Amplify Hosting connected to the Git repository","An S3 bucket synced manually with the AWS CLI","CodeDeploy pushing to EC2 instances running nginx","CloudFormation StackSets publishing to multiple regions"],
+      a:[0], e:"Amplify Hosting provides managed Git-based CI/CD — automatic builds on push, CDN-backed hosting, and per-branch and pull-request preview environments — purpose-built for front-end and full-stack web apps.", svc:"AWS Amplify Hosting" },
+
+    // ===== Domain 4: Troubleshooting & Optimization (18%) =====
+    { d:"d4", q:"A hybrid application runs on on-premises Linux servers instrumented with the AWS X-Ray SDK, yet no trace data ever reaches the X-Ray console. Which component must run on the servers to collect the SDK's output and relay it to the X-Ray service with the LEAST configuration?",
+      o:["The AWS X-Ray daemon, listening on UDP port 2000 and uploading segments to X-Ray with AWS credentials","The CloudWatch Logs agent configured for trace shipping","A scheduled Lambda function that calls PutTraceSegments on the servers' behalf","An AWS Config recorder installed on each server"],
+      a:[0], e:"The X-Ray SDK emits segments over local UDP to a daemon process, which batches and uploads them via PutTraceSegments. On premises you must install and run the daemon yourself — without it, the SDK's segments go nowhere.", svc:"X-Ray daemon" },
+
+    { d:"d4", q:"A developer enabled active tracing on a Lambda function, and the function appears in the X-Ray service map — but the DynamoDB and S3 calls it makes are missing as downstream nodes. What must be added?",
+      o:["Instrument the AWS SDK clients with the X-Ray SDK (capture/patch the clients) so their calls are recorded as subsegments","Enable CloudTrail data events for DynamoDB and S3","Raise the function's memory so tracing has more resources","Enable DynamoDB Streams on the target table"],
+      a:[0], e:"Active tracing traces the invocation itself; downstream services appear only when SDK calls are wrapped by the X-Ray SDK, which records each as a subsegment on the trace. CloudTrail is an audit log and contributes nothing to traces.", svc:"X-Ray SDK instrumentation" },
+
+    { d:"d4", q:"X-Ray tracing costs on an API handling 2,000 requests per second have become too high, but the team still needs statistically representative traces and strong visibility into failing routes. What should they adjust?",
+      o:["Create custom sampling rules with a small reservoir and low fixed rate for routine traffic, plus a higher-rate rule matching the error-prone routes","Disable tracing during business hours to halve the cost","Shorten the trace retention window","Trace only requests that hit cold starts"],
+      a:[0], e:"Sampling rules (a per-second reservoir plus a fixed percentage, matchable by service, route, and more) cut trace volume while preserving a representative sample, and targeted rules keep richer coverage where problems concentrate. Disabling tracing simply abandons observability.", svc:"X-Ray sampling rules" },
+
+    { d:"d4", q:"Support engineers must locate all X-Ray traces belonging to a specific customer ID by typing filter expressions in the trace console. How should the developer record the customer ID on each trace?",
+      o:["As an annotation, because annotations are indexed and usable in filter expressions","As metadata, because metadata is indexed for search","Inside the segment's name string","In a separate DynamoDB lookup table keyed by trace ID"],
+      a:[0], e:"Annotations are indexed key-value pairs queryable in filter expressions (annotation.customerId = ...); metadata is stored on the trace but never indexed, so it cannot be searched. Use metadata for bulky context and annotations for searchable keys.", svc:"X-Ray annotations vs metadata" },
+
+    { d:"d4", q:"A Lambda function triggered by S3 object-created events executes successfully but throws an error every time it attempts to write results to a DynamoDB table. The same code works on a developer laptop using admin credentials. What is the MOST likely cause?",
+      o:["The function's execution role lacks the required DynamoDB write permissions","The DynamoDB table runs in a different Availability Zone than the function","The table is missing a global secondary index required for writes","The function has exceeded its concurrency limit"],
+      a:[0], e:"The trigger fires and the code is proven — what differs in AWS is the execution role, so a missing dynamodb:PutItem/UpdateItem grant (AccessDeniedException) is the classic culprit. DynamoDB is a regional service where AZs are irrelevant, and no index is ever required for writes.", svc:"Lambda execution role troubleshooting" },
+
+    { d:"d4", q:"After a Lambda function was attached to private VPC subnets so it can reach an RDS database, its calls to a third-party HTTPS API on the internet now time out. What is the cause, and what is the fix?",
+      o:["VPC-attached functions have no internet path by default; route the private subnets through a NAT gateway (and use VPC endpoints for AWS services)","Lambda can never make outbound HTTPS calls from inside a VPC","The security group needs an inbound rule allowing port 443","The function needs an Elastic IP attached to its network interface"],
+      a:[0], e:"In a VPC, Lambda traffic leaves through ENIs in your subnets: without a NAT gateway route there is no path to the internet (interface/gateway endpoints cover AWS services privately). Inbound rules do not affect outbound calls, and EIPs cannot be attached to Lambda ENIs.", svc:"Lambda in a VPC" },
+
+    { d:"d4", q:"Clients of a REST API using Lambda proxy integration intermittently receive HTTP 502 responses, yet the function's logs show it completing without exceptions. What is the MOST likely cause?",
+      o:["The function sometimes returns a response that violates the required proxy format — statusCode plus headers and a string body","API Gateway is throttling those particular clients","The 29-second integration timeout is expiring","The clients' API keys have exceeded their quota"],
+      a:[0], e:"Proxy integrations demand an exact response shape; returning a raw object, a non-string body, or omitting statusCode produces 502 Bad Gateway even though the code ran fine. Throttling surfaces as 429 and an integration timeout as 504.", svc:"API Gateway 502 diagnosis" },
+
+    { d:"d4", q:"During a marketing campaign, some callers of a REST API receive HTTP 429 responses while other requests succeed normally. What is happening?",
+      o:["Requests are exceeding a throttling limit — at the account, stage, method, or usage-plan level — and are being rejected","The backing Lambda function is throwing unhandled exceptions","DNS resolution is failing intermittently for some clients","The stage's cache cluster has filled up"],
+      a:[0], e:"429 Too Many Requests is API Gateway throttling against burst or rate limits. Affected clients should retry with backoff, and the team can raise limits, add caching, or introduce usage plans; code errors would return 5xx instead.", svc:"API Gateway throttling" },
+
+    { d:"d4", q:"A Lambda function processing SQS batches occasionally fails one record, which causes the whole batch to retry and some orders to be handled twice. Which TWO changes together make the processing both safe and efficient? (Choose TWO)",
+      o:["Enable ReportBatchItemFailures so only the failed records return to the queue","Make the processing idempotent so a redelivered record has no additional effect","Delete every message before processing it to guarantee single handling","Raise the batch size to the maximum to reduce invocation counts","Re-encrypt the queue with a customer managed key"],
+      a:[0,1], multi:true, e:"Partial batch responses stop successful records from being retried, and idempotency guards against the duplicates that SQS's at-least-once delivery can still produce. Deleting before processing risks silent data loss, and batch size or encryption changes do not address duplication.", svc:"SQS batch failure handling" },
+
+    { d:"d4", q:"A malformed message repeatedly crashes an SQS consumer; it returns to the queue after every visibility timeout and starves useful work. How should the team automatically isolate such poison messages for later analysis?",
+      o:["Configure a redrive policy with a dead-letter queue and a maxReceiveCount so the message moves to the DLQ after repeated receive failures","Purge the queue whenever consumer throughput stalls","Shorten the retention period to one minute so bad messages expire","Wrap the consumer in a catch-all handler that silently discards failures"],
+      a:[0], e:"A redrive policy moves any message received more than maxReceiveCount times into the DLQ, unblocking the pipeline while preserving the payload for debugging and optional redrive. Purging destroys good messages, and silent discards lose data invisibly.", svc:"SQS dead-letter queues" },
+
+    { d:"d4", q:"An engineer must determine how many times each distinct error message occurred across dozens of Lambda log groups over the past 24 hours — interactively and without provisioning any new infrastructure. Which tool fits?",
+      o:["CloudWatch Logs Insights, querying the selected log groups with filter, parse, and stats aggregations","Downloading all the log streams and searching them locally","The X-Ray service map's error view","An AWS Config resource timeline"],
+      a:[0], e:"Logs Insights runs ad-hoc queries — filter, parse, stats count() by field — across many log groups simultaneously, purpose-built for interactive log analysis. Downloading at that scale is impractical, and X-Ray aggregates traces rather than log text.", svc:"CloudWatch Logs Insights" },
+
+    { d:"d4", q:"On-call engineers must be paged whenever the string PaymentDeclined appears more than 50 times within five minutes in an application's CloudWatch log group — with NO changes to the application. Which setup achieves this?",
+      o:["A metric filter on the log group counting the pattern, with a CloudWatch alarm on the resulting metric that notifies an SNS topic","A subscription filter streaming the log group into Kinesis Data Firehose","CloudTrail Insights enabled on the account's management events","A Logs Insights query pinned to a CloudWatch dashboard"],
+      a:[0], e:"Metric filters convert matching log events into a CloudWatch metric in near real time, and an alarm on that metric pages through SNS. Dashboards and saved queries are passive displays — nobody gets woken up.", svc:"Metric filters + alarms" },
+
+    { d:"d4", q:"A high-throughput Lambda function must publish several custom business metrics on every invocation. Synchronous PutMetricData calls are adding latency and approaching API throttling limits. What is the recommended pattern?",
+      o:["Write the metrics into the function's logs in CloudWatch Embedded Metric Format (EMF) and let CloudWatch extract them asynchronously","Batch the PutMetricData calls but keep them inside the request path","Store metric values in DynamoDB and graph them with a custom dashboard app","Aggregate the numbers manually in a weekly spreadsheet"],
+      a:[0], e:"EMF-formatted log lines are converted into metrics by CloudWatch automatically — no synchronous API calls, no throttle exposure, full dimension support. It is the recommended pattern for high-volume metric emission from Lambda.", svc:"Embedded Metric Format" },
+
+    { d:"d4", q:"Users complain about occasional very slow responses from an API, yet the team's AVERAGE-latency dashboard looks perfectly healthy. Which alarm configuration will actually detect the problem?",
+      o:["An alarm on the p99 latency statistic crossing the SLA threshold","An average-latency alarm evaluated over a longer period","An alarm on total request count","An alarm on the minimum latency statistic"],
+      a:[0], e:"Percentile statistics expose tail latency: p99 captures the slowest 1% of requests that averages mathematically hide. Lengthening the averaging window smooths the signal even further away from the user complaints.", svc:"CloudWatch percentile alarms" },
+
+    { d:"d4", q:"A DynamoDB table throttles writes during live sports events even though its total provisioned WCU far exceeds the aggregate write rate. CloudWatch Contributor Insights shows most writes targeting the single partition key value of the current game. What is the BEST fix?",
+      o:["Shard the hot partition key — append a random or calculated suffix — so the writes spread across partitions, aggregating on read","Double the table-level WCU again","Enable TTL to remove older items sooner","Add a global secondary index on the game attribute"],
+      a:[0], e:"Per-partition throughput is capped regardless of table-level capacity, so one hot key throttles no matter how much you provision. Write sharding across N suffixed keys distributes the load; raising WCU alone cannot fix single-key concentration.", svc:"DynamoDB write sharding" },
+
+    { d:"d4", q:"The GetRecords.IteratorAgeMilliseconds metric for a Lambda function consuming a Kinesis stream climbs steadily through every peak. What does this indicate, and what addresses it?",
+      o:["The consumer is falling behind the stream; add shards, raise the event source mapping's parallelization factor, and speed up per-batch processing","Records are being retained too long; shorten the retention period","The producer is writing too slowly; batch its puts","Server-side encryption is delaying reads; disable it"],
+      a:[0], e:"Rising iterator age means records wait longer before processing — consumer lag that risks data loss as it approaches the retention limit. More shards, a higher parallelization factor (up to 10 concurrent batches per shard), and faster processing restore pace.", svc:"Kinesis IteratorAge" },
+
+    { d:"d4", q:"A latency-critical checkout API backed by Lambda misses its SLA on the first requests after idle periods and during sudden ramp-ups because of cold starts. Which feature eliminates the initialization delay for a baseline level of traffic?",
+      o:["Provisioned concurrency on the function's alias, optionally scheduled higher ahead of known peaks","Reserved concurrency set to the expected peak","A smaller deployment package with fewer dependencies","Invoking the function with a warm-up ping every five minutes"],
+      a:[0], e:"Provisioned concurrency keeps execution environments fully initialized so requests skip cold-start setup entirely, and Application Auto Scaling can schedule it around peaks. Reserved concurrency only caps concurrency, and a single ping keeps just one environment warm.", svc:"Provisioned concurrency" },
+
+    { d:"d4", q:"Profiling shows an image-transformation Lambda function is CPU-bound, taking 28 seconds per run at 512 MB of memory. The team wants faster execution and is told the change might not even increase cost. What should they do?",
+      o:["Increase the memory setting, which scales vCPU proportionally — often cutting duration enough to offset the higher per-millisecond price","Raise the function timeout to 60 seconds","Add provisioned concurrency to the function","Move the images into a Lambda layer"],
+      a:[0], e:"CPU (and network) scale linearly with memory in Lambda, so a CPU-bound function at higher memory finishes disproportionately faster; since billing is memory times duration, cost can stay flat or even drop — verify with the Lambda Power Tuning tool. Timeout only bounds runtime.", svc:"Lambda memory/CPU tuning" },
+
+    { d:"d4", q:"An application calling several AWS APIs sees bursts of 429 throttling and transient 5xx errors at daily peaks, and its current immediate-retry loop is making the situation worse. What is the AWS-recommended client-side remedy?",
+      o:["Retries with exponential backoff plus jitter, as implemented by the AWS SDKs' standard and adaptive retry modes","A fixed one-millisecond retry interval for predictability","Treating every throttle as a permanent failure","Duplicating each request in parallel and taking the fastest response"],
+      a:[0], e:"Exponential backoff spreads retries out while jitter desynchronizes competing clients, defusing retry storms; the SDKs' standard and adaptive modes implement this (adaptive adds client-side rate limiting). Tight loops and duplicated requests amplify the overload.", svc:"Backoff and jitter" },
+
+    { d:"d4", q:"A global web application serves the same product images and CSS to all users from S3 through its application servers, causing high latency for distant users and unnecessary load on the origin. Which change improves BOTH problems with the LEAST effort?",
+      o:["Serve the static assets through a CloudFront distribution with appropriate Cache-Control headers so edge locations cache them close to users","Enable S3 Transfer Acceleration on the assets bucket","Replicate the bucket to five regions and route users by geography","Store the image binaries in DynamoDB global tables"],
+      a:[0], e:"CloudFront caches static content at edge locations worldwide, cutting user latency and origin requests at once, tuned via TTLs and Cache-Control. Transfer Acceleration optimizes uploads into S3, and multi-region replication is far more complex for the same outcome.", svc:"CloudFront edge caching" },
   ];
 
   // ---------- state ----------
